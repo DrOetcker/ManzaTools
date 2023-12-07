@@ -1,31 +1,40 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using ManzaTools.Config;
+using ManzaTools.Services;
+using ManzaTools.Utils;
 
 namespace ManzaTools
 {
-    public class ManzaTools : BasePlugin, IPluginConfig<ManzaToolsConfig>
+    public partial class ManzaTools : BasePlugin, IPluginConfig<ManzaToolsConfig>
     {
-        public override string ModuleName => "plugin name";
-        public override string ModuleAuthor => "author";
+        public override string ModuleName => "ManzaTools";
+        public override string ModuleAuthor => "DrOetcker";
         public override string ModuleVersion => "0.0.1";
-
-
         public ManzaToolsConfig Config { get; set; } = new();
+        private CfgShipper _cfgShipper;
 
-        public void Load(bool hotReload)
+        public ManzaTools(CfgShipper cfgShipper)
         {
-
+            _cfgShipper = cfgShipper;
         }
 
-        public void Unload(bool hotReload)
+        public override void Load(bool hotReload)
+        {
+            _cfgShipper.InitDefaultCfgs(ModuleDirectory);
+        }
+
+        public override void Unload(bool hotReload)
         {
 
         }
 
         public void OnConfigParsed(ManzaToolsConfig config)
         {
-            this.Config = config;
+            Config = config;
+            Responses.ReplyToServer(">>> ConfigParsed ManzCs2Plugin <<<", false, true);
         }
-    }
 
+
+    }
 }
