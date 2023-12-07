@@ -10,6 +10,7 @@ namespace ManzaTools
         {
             serviceCollection.AddSingleton<CfgShipper>();
             serviceCollection.AddSingleton<GameModeService>();
+            serviceCollection.AddSingleton<SmokeTimer>();
         }
     }
 }
