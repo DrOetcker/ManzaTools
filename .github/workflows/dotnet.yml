@@ -5,9 +5,9 @@ name: Build & Publish
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "develop" ]
 
 env:
   PLUGIN_NAME: ManzaTools
@@ -23,31 +23,32 @@ jobs:
       - name: Prepare env
         shell: bash
         run: echo "GITHUB_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
-
+        
       - uses: actions/checkout@v3
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
-
+          
       - name: Restore dependencies
         run: dotnet restore
-
+        
       - name: Build
         run: dotnet publish --no-restore
-
+        
       - name: Clean build directory
         run: |
           mkdir -p addons/counterstrikesharp/plugins/${{env.PLUGIN_NAME}}
           mv ManzaTools/bin/Debug/net7.0/publish/* addons/counterstrikesharp/plugins/${{env.PLUGIN_NAME}}
           cd addons/counterstrikesharp/plugins/${{env.PLUGIN_NAME}}
           rm CounterStrikeSharp.API.dll McMaster.NETCore.Plugins.dll Microsoft.DotNet.PlatformAbstractions.dll Microsoft.Extensions.DependencyModel.dll ${{env.PLUGIN_NAME}}.pdb
-
+          
       - uses: actions/upload-artifact@v3
         with:
           name: css-${{env.PLUGIN_NAME}}-${{ env.GITHUB_SHA_SHORT }}
           path: addons
-
+          
       - name: Generate build number
         id: buildnumber
         uses: onyxmueller/build-tag-number@v1
