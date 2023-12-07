@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities;
 using ManzaTools.Config;
 using ManzaTools.Models;
 using ManzaTools.Services;
@@ -29,8 +30,7 @@ namespace ManzaTools
         public override void Load(bool hotReload)
         {
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
-            if (!hotReload)
-                _gameModeService.LoadGameMode(GameModeEnum.Practice);
+            _gameModeService.LoadGameMode(GameModeEnum.Practice);
             RegisterListeners();
         }
 
@@ -48,12 +48,19 @@ namespace ManzaTools
         private void RegisterListeners()
         {
             InitSmokeTimer();
+            InitChangeMap();
+        }
+
+        private void InitChangeMap()
+        {
+            AddCommand("css_changeMap", "Changes the current Map", (player, info) => _changeMapService.Changemap(player, info, Config.AvailibleMaps));
+            //RegisterListener((Listeners.OnMapStart)(entity => Logging.Log("mapstart")));
         }
 
         private void InitSmokeTimer()
         {
             RegisterListener((Listeners.OnEntitySpawned)(entity => _smokeTimer.OnEntitySpawn(entity, Config.SmokeTimerEnabled)));
-            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) =>  _smokeTimer.OnSmokeGrenadeDetonate(@event, info, Config.SmokeTimerEnabled));
+            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _smokeTimer.OnSmokeGrenadeDetonate(@event, info, Config.SmokeTimerEnabled));
         }
 
 

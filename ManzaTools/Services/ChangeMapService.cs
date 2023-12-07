@@ -1,4 +1,7 @@
-﻿using DrOetcker.Models;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Commands;
+using DrOetcker.Models;
 using ManzaTools.Utils;
 using System.Text.Json;
 
@@ -6,6 +9,37 @@ namespace ManzaTools.Services
 {
     public class ChangeMapService
     {
+        //TODO Catch MapChangedEvent & set GameMode
+        internal void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availibleMaps)
+        {
+            if (command == null)
+                return;
+            if (command.ArgCount == 1)
+            {
+                Responses.ReplyToPlayer(Statics.GetChatText("Available Maps:"), player);
+                Responses.ReplyToPlayer(string.Join(", ", availibleMaps.Select(x => x.Name)), player);
+                return;
+            }
+            var newMapName = command.GetArg(1);
+            var newMap = availibleMaps.FirstOrDefault(map => map.Name == newMapName);
+            if (newMap == null)
+            {
+                if (player != null)
+                {
+                    Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
+                    Responses.ReplyToPlayer(string.Join(", ", availibleMaps.Select(x => x.Name)), player);
+                }
+                Responses.ReplyToServer($"Selected map {newMapName} not found.", false, true);
+            }
+            else
+            {
+                if (newMap.Id > 0)
+                    Server.ExecuteCommand($"host_workshop_map {newMap.Id}");
+                else
+                    Server.ExecuteCommand($"changelevel {newMap.Name}");
+            }
+        }
+
         public IList<Map> LoadMaps()
         {
             string fileName = "maps.json";
