@@ -1,6 +1,4 @@
-﻿using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Core.Attributes.Registration;
+﻿using CounterStrikeSharp.API.Core;
 using ManzaTools.Config;
 using ManzaTools.Models;
 using ManzaTools.Services;
@@ -18,12 +16,14 @@ namespace ManzaTools
         private readonly CfgShipper _cfgShipper;
         private readonly GameModeService _gameModeService;
         private readonly SmokeTimer _smokeTimer;
+        private readonly ChangeMapService _changeMapService;
 
-        public ManzaTools(CfgShipper cfgShipper, GameModeService gameModeService, SmokeTimer smokeTimer)
+        public ManzaTools(CfgShipper cfgShipper, GameModeService gameModeService, SmokeTimer smokeTimer, ChangeMapService changeMapService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
             _smokeTimer = smokeTimer;
+            _changeMapService = changeMapService;
         }
 
         public override void Load(bool hotReload)
@@ -41,6 +41,7 @@ namespace ManzaTools
         public void OnConfigParsed(ManzaToolsConfig config)
         {
             Config = config;
+            Config.AvailibleMaps = _changeMapService.LoadMaps();
             Responses.ReplyToServer(">>> ConfigParsed ManzCs2Plugin <<<", false, true);
         }
 

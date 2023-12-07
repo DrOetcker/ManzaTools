@@ -1,11 +1,11 @@
 ﻿using CounterStrikeSharp.API.Core;
-using System.Text.Json.Serialization;
+using DrOetcker.Models;
 
 namespace ManzaTools.Config
 {
     public class ManzaToolsConfig : BasePluginConfig
     {
-        [JsonPropertyName("SmokeTimerEnabled")]
         public bool SmokeTimerEnabled { get; set; } = true;
+        public IList<Map> AvailibleMaps { get; set; } = new List<Map>();
     }
 }
