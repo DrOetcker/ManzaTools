@@ -13,6 +13,7 @@ namespace ManzaTools
             serviceCollection.AddSingleton<SmokeTimer>();
             serviceCollection.AddSingleton<ChangeMapService>(); 
             serviceCollection.AddSingleton<DeathmatchService>(); 
+            serviceCollection.AddSingleton<SpawnService>();
         }
     }
 }

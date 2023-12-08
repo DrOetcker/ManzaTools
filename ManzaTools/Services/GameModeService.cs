@@ -6,7 +6,8 @@ namespace ManzaTools.Services
 {
     public class GameModeService
     {
-        public GameModeEnum currentGameMode = GameModeEnum.Practice;
+        private GameModeEnum currentGameMode = GameModeEnum.Practice;
+        public GameModeEnum CurrentGameMode { get; internal set; }
 
         public GameModeService()
         {
@@ -27,14 +28,14 @@ namespace ManzaTools.Services
                 Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", Statics.GameModeCfgs[GameModeEnum.Practice])}");
             }
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
-            currentGameMode = newGameMode;
-            Responses.ReplyToServer($"Loaded GameMode {currentGameMode}!{GetHappyTextByMode(currentGameMode)}");
-            Responses.ReplyToServer($"Availible commands: {GetAvailibleCommandsByGameMode(currentGameMode)}");
+            CurrentGameMode = newGameMode;
+            Responses.ReplyToServer($"Loaded GameMode {CurrentGameMode}!{GetHappyTextByMode(CurrentGameMode)}");
+            Responses.ReplyToServer($"Availible commands: {GetAvailibleCommandsByGameMode(CurrentGameMode)}");
         }
         
         internal bool IsPractice()
         {
-            return currentGameMode == GameModeEnum.Practice || currentGameMode == GameModeEnum.PracticeMatch;
+            return CurrentGameMode == GameModeEnum.Practice || CurrentGameMode == GameModeEnum.PracticeMatch;
         }
 
         private string GetAvailibleCommandsByGameMode(GameModeEnum currentGameMode)

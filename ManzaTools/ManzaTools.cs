@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities;
 using ManzaTools.Config;
 using ManzaTools.Models;
 using ManzaTools.Services;
@@ -18,24 +19,27 @@ namespace ManzaTools
         private readonly SmokeTimer _smokeTimer;
         private readonly ChangeMapService _changeMapService;
         private readonly DeathmatchService _deathmatchService;
+        private readonly SpawnService _spawnService;
 
         public ManzaTools(CfgShipper cfgShipper, 
             GameModeService gameModeService, 
             SmokeTimer smokeTimer, 
             ChangeMapService changeMapService, 
-            DeathmatchService deathmatchService)
+            DeathmatchService deathmatchService,
+            SpawnService spawnService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
             _smokeTimer = smokeTimer;
             _changeMapService = changeMapService;
             _deathmatchService = deathmatchService;
+            _spawnService = spawnService;
         }
 
         public override void Load(bool hotReload)
         {
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
-            _gameModeService.LoadGameMode(_gameModeService.currentGameMode);
+            _gameModeService.LoadGameMode(_gameModeService.CurrentGameMode);
             RegisterListeners();
             Responses.ReplyToServer("Loaded ManzaTools", false, true);
         }
@@ -59,6 +63,7 @@ namespace ManzaTools
             InitPractice();
             InitPracticeMatch();
             InitDeathMatch();
+            InitSpawn();
         }
 
         private void InitPractice()
@@ -74,6 +79,7 @@ namespace ManzaTools
         private void InitDeathMatch()
         {
             AddCommand("css_deathmatch", "Changes the current GameMode to deathmatch", (player, info) => _deathmatchService.StartDeathmatch(player, info));
+            RegisterEventHandler<EventPlayerDeath>((@event, info) =>  _deathmatchService.HandlePlayerDeath(@event, info));
         }
 
         private void InitChangeMap()
@@ -86,6 +92,11 @@ namespace ManzaTools
         {
             RegisterListener((Listeners.OnEntitySpawned)(entity => _smokeTimer.OnEntitySpawn(entity, Config.SmokeTimerEnabled)));
             RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _smokeTimer.OnSmokeGrenadeDetonate(@event, info, Config.SmokeTimerEnabled));
+        }
+
+        private void InitSpawn()
+        {
+            AddCommand("css_spawn", "Sets the spawn of a player", (player, info) => _spawnService.SetPlayerPosition(player, info));
         }
 
 
