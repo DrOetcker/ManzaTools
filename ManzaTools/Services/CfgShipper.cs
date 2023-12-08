@@ -12,12 +12,15 @@ namespace ManzaTools.Services
             if (!Directory.Exists(Statics.CfgPath))
                 Directory.CreateDirectory(Statics.CfgPath);
 
-            InitCfg(modulePath, GameModeEnum.Practice);
-            InitCfg(modulePath, GameModeEnum.PracticeMatch);
-            InitCfg(modulePath, GameModeEnum.Deathmatch);
+            var initCfgDirectory = Path.Combine(modulePath, "initCfgs");
+            InitCfg(modulePath, initCfgDirectory, GameModeEnum.Practice);
+            InitCfg(modulePath, initCfgDirectory, GameModeEnum.PracticeMatch);
+            InitCfg(modulePath, initCfgDirectory, GameModeEnum.Deathmatch);
+            if (Directory.Exists(initCfgDirectory))
+                Directory.Delete(initCfgDirectory, true);
         }
 
-        private void InitCfg(string modulePath, GameModeEnum gameMode)
+        private void InitCfg(string modulePath, string initCfgDirectory, GameModeEnum gameMode)
         {
             var cfgPath = Path.Combine(Statics.CfgPath, Statics.GameModeCfgs[gameMode]);
             //If config already exists dont override it!
@@ -25,7 +28,6 @@ namespace ManzaTools.Services
                 return;
 
 
-            var initCfgDirectory = Path.Combine(modulePath, "initCfgs");
             var initCfgPath = Path.Combine(initCfgDirectory, Statics.GameModeCfgs[gameMode]);
 
             using (StreamReader fileReader = File.OpenText(initCfgPath))
@@ -35,7 +37,6 @@ namespace ManzaTools.Services
                 using(StreamWriter fileWriter = File.CreateText(cfgPath))
                     fileWriter.Write(cfgContent);
             }
-            Directory.Delete(initCfgDirectory, true);
             Responses.ReplyToServer($"Init of cfg {Statics.GameModeCfgs[gameMode]} done", false, true);
         }
     }

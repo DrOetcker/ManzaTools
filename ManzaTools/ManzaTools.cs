@@ -1,4 +1,6 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
 using ManzaTools.Config;
 using ManzaTools.Models;
@@ -18,19 +20,25 @@ namespace ManzaTools
         private readonly GameModeService _gameModeService;
         private readonly SmokeTimer _smokeTimer;
         private readonly ChangeMapService _changeMapService;
+        private readonly DeathmatchService _deathmatchService;
 
-        public ManzaTools(CfgShipper cfgShipper, GameModeService gameModeService, SmokeTimer smokeTimer, ChangeMapService changeMapService)
+        public ManzaTools(CfgShipper cfgShipper, 
+            GameModeService gameModeService, 
+            SmokeTimer smokeTimer, 
+            ChangeMapService changeMapService, 
+            DeathmatchService deathmatchService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
             _smokeTimer = smokeTimer;
             _changeMapService = changeMapService;
+            _deathmatchService = deathmatchService;
         }
 
         public override void Load(bool hotReload)
         {
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
-            _gameModeService.LoadGameMode(GameModeEnum.Practice);
+            _gameModeService.LoadGameMode(_gameModeService.currentGameMode);
             RegisterListeners();
         }
 
@@ -49,6 +57,24 @@ namespace ManzaTools
         {
             InitSmokeTimer();
             InitChangeMap();
+            InitPractice();
+            InitPracticeMatch();
+            InitDeathMatch();
+        }
+
+        private void InitPractice()
+        {
+            AddCommand("css_prac", "Changes the current GameMode to practice", (player, info) => _gameModeService.LoadGameMode(GameModeEnum.Practice));
+        }
+
+        private void InitPracticeMatch()
+        {
+            AddCommand("css_pracmatch", "Changes the current GameMode to practice match", (player, info) => _gameModeService.LoadGameMode(GameModeEnum.PracticeMatch));
+        }
+
+        private void InitDeathMatch()
+        {
+            AddCommand("css_deathmatch", "Changes the current GameMode to deathmatch", (player, info) => _deathmatchService.StartDeathmatch(player, info));
         }
 
         private void InitChangeMap()

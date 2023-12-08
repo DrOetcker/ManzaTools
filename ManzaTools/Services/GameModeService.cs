@@ -14,11 +14,17 @@ namespace ManzaTools.Services
 
         public void LoadGameMode(GameModeEnum newGameMode)
         {
-            var cfgToLoad = Statics.GameModeCfgs[currentGameMode];
+            Responses.ReplyToServer($"New GameMode {newGameMode}");
+            var cfgToLoad = Statics.GameModeCfgs[newGameMode];
+            Responses.ReplyToServer($"cfg {cfgToLoad}");
             if (string.IsNullOrEmpty(cfgToLoad))
             {
                 Logging.Log($"No cfg found for GameMode {newGameMode}. Keeping GameMode {currentGameMode}");
                 return;
+            }
+            if(newGameMode == GameModeEnum.PracticeMatch)
+            {
+                Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", Statics.GameModeCfgs[GameModeEnum.Practice])}");
             }
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
             currentGameMode = newGameMode;
