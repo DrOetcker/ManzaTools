@@ -1,7 +1,4 @@
-﻿using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
+﻿using CounterStrikeSharp.API.Core;
 using ManzaTools.Config;
 using ManzaTools.Models;
 using ManzaTools.Services;
@@ -13,7 +10,7 @@ namespace ManzaTools
     {
         public override string ModuleName => "ManzaTools";
         public override string ModuleAuthor => "DrOetcker";
-        public override string ModuleVersion => "0.0.1";
+        public override string ModuleVersion => "0.1.0";
 
         public ManzaToolsConfig Config { get; set; } = new();
         private readonly CfgShipper _cfgShipper;
@@ -40,17 +37,19 @@ namespace ManzaTools
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
             _gameModeService.LoadGameMode(_gameModeService.currentGameMode);
             RegisterListeners();
+            Responses.ReplyToServer("Loaded ManzaTools", false, true);
         }
 
         public override void Unload(bool hotReload)
         {
+            Responses.ReplyToServer("Unloaded ManzaTools", false, true);
         }
 
         public void OnConfigParsed(ManzaToolsConfig config)
         {
             Config = config;
             Config.AvailibleMaps = _changeMapService.LoadMaps();
-            Responses.ReplyToServer(">>> ConfigParsed ManzCs2Plugin <<<", false, true);
+            Responses.ReplyToServer("ConfigParsed ManzaTools", false, true);
         }
 
         private void RegisterListeners()
