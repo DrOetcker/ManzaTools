@@ -54,7 +54,7 @@ namespace ManzaTools
         private void InitChangeMap()
         {
             AddCommand("css_changeMap", "Changes the current Map", (player, info) => _changeMapService.Changemap(player, info, Config.AvailibleMaps));
-            //RegisterListener((Listeners.OnMapStart)(entity => Logging.Log("mapstart")));
+            RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));            
         }
 
         private void InitSmokeTimer()

@@ -1,4 +1,5 @@
-﻿using ManzaTools.Models;
+﻿using CounterStrikeSharp.API;
+using ManzaTools.Models;
 using ManzaTools.Utils;
 
 namespace ManzaTools.Services
@@ -16,8 +17,10 @@ namespace ManzaTools.Services
             var cfgToLoad = Statics.GameModeCfgs[currentGameMode];
             if (string.IsNullOrEmpty(cfgToLoad))
             {
-                //ThrowError, keep gamemode
+                Logging.Log($"No cfg found for GameMode {newGameMode}. Keeping GameMode {currentGameMode}");
+                return;
             }
+            Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
             currentGameMode = newGameMode;
         }
 
