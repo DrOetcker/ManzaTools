@@ -22,11 +22,43 @@ namespace ManzaTools.Services
             }
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
             currentGameMode = newGameMode;
+            Responses.ReplyToServer($"Loaded GameMode {currentGameMode}!{GetHappyTextByMode(currentGameMode)}");
+            Responses.ReplyToServer($"Availible commands: {GetAvailibleCommandsByGameMode(currentGameMode)}");
         }
-
+        
         internal bool IsPractice()
         {
             return currentGameMode == GameModeEnum.Practice || currentGameMode == GameModeEnum.PracticeMatch;
+        }
+
+        private string GetAvailibleCommandsByGameMode(GameModeEnum currentGameMode)
+        {
+            switch (currentGameMode)
+            {
+                case GameModeEnum.Practice:
+                    return "todo";
+                case GameModeEnum.PracticeMatch:
+                    return "todo";
+                case GameModeEnum.Deathmatch:
+                    return "todo";
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private string GetHappyTextByMode(GameModeEnum currentGameMode)
+        {
+            switch (currentGameMode)
+            {
+                case GameModeEnum.Practice:
+                    return " Happy smoking! May I get a drag from that spliff too?";
+                case GameModeEnum.PracticeMatch:
+                    return " VOLKER! 10seconds! WAS MACHEN WIR???";
+                case GameModeEnum.Deathmatch:
+                    return " MOMOMOMONSTERKILLKILLKILLKILL";
+                default:
+                    return string.Empty;
+            }
         }
     }
 }
