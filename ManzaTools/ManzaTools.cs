@@ -135,7 +135,7 @@ namespace ManzaTools
 
         private void InitSavedNades()
         {
-            AddCommand("css_listnades", "Lists all saved Nades", (player, info) => _savedNadesService.ListNades(player, info));
+            AddCommand("css_listnade", "Lists all saved Nades", (player, info) => _savedNadesService.ListNades(player, info));
             AddCommand("css_loadnade", "Loads a saved Nades", (player, info) => _savedNadesService.LoadNade(player, info));
             AddCommand("css_savenade", "Saves a saved nade", (player, info) => _savedNadesService.SaveNade(player, info));
             AddCommand("css_deletenade", "Delets a saved nade", (player, info) => _savedNadesService.DeleteNade(player, info));
