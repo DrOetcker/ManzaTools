@@ -16,6 +16,7 @@ namespace ManzaTools
             serviceCollection.AddSingleton<SpawnService>();
             serviceCollection.AddSingleton<ClearService>();
             serviceCollection.AddSingleton<RconService>();
+            serviceCollection.AddSingleton<RethrowService>();
         }
     }
 }

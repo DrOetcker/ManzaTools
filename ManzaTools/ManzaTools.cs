@@ -23,6 +23,7 @@ namespace ManzaTools
         private readonly SpawnService _spawnService;
         private readonly ClearService _clearService;
         private readonly RconService _rconService;
+        private readonly RethrowService _rethrowService;
 
         public ManzaTools(CfgShipper cfgShipper, 
             GameModeService gameModeService, 
@@ -31,7 +32,8 @@ namespace ManzaTools
             SmokeTimer smokeTimer, 
             SpawnService spawnService,
             ClearService clearService,
-            RconService rconService)
+            RconService rconService,
+            RethrowService rethrowService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -41,6 +43,7 @@ namespace ManzaTools
             _spawnService = spawnService;
             _clearService = clearService;
             _rconService = rconService;
+            _rethrowService = rethrowService;
         }
 
         public override void Load(bool hotReload)
@@ -74,6 +77,7 @@ namespace ManzaTools
             InitSpawn();
             InitClear();
             InitRcon();
+            InitRethrow();
         }
 
         private void InitPractice()
@@ -117,6 +121,11 @@ namespace ManzaTools
         private void InitRcon()
         {
             AddCommand("css_rcon", "Executes a command on the server", (player, info) => _rconService.Execute(player, info));
+        }
+
+        private void InitRethrow()
+        {
+            AddCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", (player, info) => _rethrowService.Rethrow(player, info));
         }
 
 
