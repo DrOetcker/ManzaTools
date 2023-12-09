@@ -25,6 +25,7 @@ namespace ManzaTools
         private readonly RconService _rconService;
         private readonly RethrowService _rethrowService;
         private readonly EndRoundService _endRoundService;
+        private readonly SavedNadesService _savedNadesService;
 
         public ManzaTools(CfgShipperService cfgShipper, 
             GameModeService gameModeService, 
@@ -35,7 +36,8 @@ namespace ManzaTools
             ClearService clearService,
             RconService rconService,
             RethrowService rethrowService,
-            EndRoundService endRoundService)
+            EndRoundService endRoundService,
+            SavedNadesService savedNadesService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -47,6 +49,7 @@ namespace ManzaTools
             _rconService = rconService;
             _rethrowService = rethrowService;
             _endRoundService = endRoundService;
+            _savedNadesService = savedNadesService;
         }
 
         public override void Load(bool hotReload)
@@ -83,6 +86,7 @@ namespace ManzaTools
             InitRcon();
             InitRethrow();
             InitEndround();
+            InitSavedNades();
         }
 
         private void InitPractice()
@@ -129,6 +133,15 @@ namespace ManzaTools
             AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _smokeTimer.ToggleSmokeTimer(player, info));
         }
 
+        private void InitSavedNades()
+        {
+            AddCommand("css_listnades", "Lists all saved Nades", (player, info) => _savedNadesService.ListNades(player, info));
+            AddCommand("css_loadnade", "Loads a saved Nades", (player, info) => _savedNadesService.LoadNade(player, info));
+            AddCommand("css_savenade", "Saves a saved nade", (player, info) => _savedNadesService.SaveNade(player, info));
+            AddCommand("css_deletenade", "Delets a saved nade", (player, info) => _savedNadesService.DeleteNade(player, info));
+            AddCommand("css_updatenade", "Updates a saved nade", (player, info) => _savedNadesService.UpdateNade(player, info));
+        }
+
         private void InitEndround()
         {
             AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));  
@@ -138,7 +151,7 @@ namespace ManzaTools
         {
             AddCommand("css_rcon", "Executes a command on the server", (player, info) => _rconService.Execute(player, info));
         }
-
+        
 
     }
 }

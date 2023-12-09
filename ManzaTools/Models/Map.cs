@@ -1,4 +1,4 @@
-﻿namespace DrOetcker.Models
+﻿namespace ManzaTools.Models
 {
     public class Map
     {

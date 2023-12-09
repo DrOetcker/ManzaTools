@@ -1,5 +1,4 @@
 ﻿using CounterStrikeSharp.API.Core;
-using DrOetcker.Models;
 using ManzaTools.Models;
 
 namespace ManzaTools.Config
