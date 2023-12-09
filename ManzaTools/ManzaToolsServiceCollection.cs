@@ -14,6 +14,7 @@ namespace ManzaTools
             serviceCollection.AddSingleton<ChangeMapService>(); 
             serviceCollection.AddSingleton<DeathmatchService>(); 
             serviceCollection.AddSingleton<SpawnService>();
+            serviceCollection.AddSingleton<ClearService>();
         }
     }
 }

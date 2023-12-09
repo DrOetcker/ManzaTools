@@ -20,13 +20,15 @@ namespace ManzaTools
         private readonly ChangeMapService _changeMapService;
         private readonly DeathmatchService _deathmatchService;
         private readonly SpawnService _spawnService;
+        private readonly ClearService _clearService;
 
         public ManzaTools(CfgShipper cfgShipper, 
             GameModeService gameModeService, 
-            SmokeTimer smokeTimer, 
             ChangeMapService changeMapService, 
             DeathmatchService deathmatchService,
-            SpawnService spawnService)
+            SmokeTimer smokeTimer, 
+            SpawnService spawnService,
+            ClearService clearService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -34,6 +36,7 @@ namespace ManzaTools
             _changeMapService = changeMapService;
             _deathmatchService = deathmatchService;
             _spawnService = spawnService;
+            _clearService = clearService;
         }
 
         public override void Load(bool hotReload)
@@ -97,6 +100,11 @@ namespace ManzaTools
         private void InitSpawn()
         {
             AddCommand("css_spawn", "Sets the spawn of a player", (player, info) => _spawnService.SetPlayerPosition(player, info));
+        }
+
+        private void InitClear()
+        {
+            AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.SetPlayerPosition(player, info));
         }
 
 
