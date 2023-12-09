@@ -22,6 +22,7 @@ namespace ManzaTools
         private readonly DeathmatchService _deathmatchService;
         private readonly SpawnService _spawnService;
         private readonly ClearService _clearService;
+        private readonly RconService _rconService;
 
         public ManzaTools(CfgShipper cfgShipper, 
             GameModeService gameModeService, 
@@ -29,7 +30,8 @@ namespace ManzaTools
             DeathmatchService deathmatchService,
             SmokeTimer smokeTimer, 
             SpawnService spawnService,
-            ClearService clearService)
+            ClearService clearService,
+            RconService rconService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -38,6 +40,7 @@ namespace ManzaTools
             _deathmatchService = deathmatchService;
             _spawnService = spawnService;
             _clearService = clearService;
+            _rconService = rconService;
         }
 
         public override void Load(bool hotReload)
@@ -70,6 +73,7 @@ namespace ManzaTools
             InitDeathMatch();
             InitSpawn();
             InitClear();
+            InitRcon();
         }
 
         private void InitPractice()
@@ -108,6 +112,11 @@ namespace ManzaTools
         private void InitClear()
         {
             AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.ClearUtilities(player, info));
+        }
+
+        private void InitRcon()
+        {
+            AddCommand("css_rcon", "Executes a command on the server", (player, info) => _rconService.Execute(player, info));
         }
 
 
