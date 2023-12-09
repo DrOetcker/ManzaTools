@@ -2,16 +2,17 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Utils;
+using ManzaTools.Extensions;
 using ManzaTools.Utils;
 
 namespace ManzaTools.Services
 {
     public class SpawnService : PracticeBaseService
     {
-        //TeamNum = 3
+        //TeamNum 3 = CT
         public IList<SpawnPoint> CtSpawns { get; }
 
-        //TeamNum = 2
+        //TeamNum 2 = T
         public IList<SpawnPoint> TSpawns { get; }
 
         public SpawnService(GameModeService gameModeService)
@@ -32,12 +33,10 @@ namespace ManzaTools.Services
                 return;
             }
             var teamArg = info.ArgByIndex(2);
-            var teamNum = string.IsNullOrEmpty(teamArg) ? player.TeamNum : (teamArg.ToLower() == "t" ? 2 : 3);
-            var spawn = teamNum == 2 ? TSpawns[spawnId - 1] : CtSpawns[spawnId - 1];
+            var teamNum = string.IsNullOrEmpty(teamArg) ? player.TeamNum : (teamArg.ToLower() == "t" ? (byte)2 : (byte)3);
+            var spawn = PlayerExtension.IsCounterTerrorist(teamNum) ? CtSpawns[spawnId - 1] : TSpawns[spawnId - 1];
             if(spawn.CBodyComponent?.SceneNode != null && player?.PlayerPawn?.Value != null)
-            {
                 player.PlayerPawn.Value.Teleport(spawn.CBodyComponent.SceneNode.AbsOrigin, spawn.CBodyComponent.SceneNode.AbsRotation, new Vector(0, 0, 0));
-            }
 
         }
     }

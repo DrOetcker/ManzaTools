@@ -33,13 +33,19 @@ namespace ManzaTools.Services
 
 
             var initCfgPath = Path.Combine(initCfgDirectory, cfgFileName);
-
-            using (StreamReader fileReader = File.OpenText(initCfgPath))
+            try
             {
-                var cfgContent = fileReader.ReadToEnd();
-                fileReader.ReadToEnd();
-                using(StreamWriter fileWriter = File.CreateText(cfgPath))
-                    fileWriter.Write(cfgContent);
+                using (StreamReader fileReader = File.OpenText(initCfgPath))
+                {
+                    var cfgContent = fileReader.ReadToEnd();
+                    fileReader.ReadToEnd();
+                    using(StreamWriter fileWriter = File.CreateText(cfgPath))
+                        fileWriter.Write(cfgContent);
+                }
+            }
+            catch(Exception ex)
+            {
+                Logging.Log($"Error {ex.Message}");
             }
             Responses.ReplyToServer($"Init of {cfgFileName} done", false, true);
         }

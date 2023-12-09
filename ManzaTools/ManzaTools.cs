@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Config;
 using CounterStrikeSharp.API.Modules.Entities;
 using ManzaTools.Config;
@@ -28,18 +29,19 @@ namespace ManzaTools
         private readonly SavedNadesService _savedNadesService;
         private readonly BotService _botService;
 
-        public ManzaTools(CfgShipperService cfgShipper, 
-            GameModeService gameModeService, 
-            ChangeMapService changeMapService, 
+        public ManzaTools(CfgShipperService cfgShipper,
+            GameModeService gameModeService,
+            SmokeTimerService smokeTimer,
+            ChangeMapService changeMapService,
             DeathmatchService deathmatchService,
-            SmokeTimerService smokeTimer, 
             SpawnService spawnService,
             ClearService clearService,
             RconService rconService,
             RethrowService rethrowService,
             EndRoundService endRoundService,
             SavedNadesService savedNadesService,
-            BotService botService)
+            BotService botService
+            )
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -68,17 +70,25 @@ namespace ManzaTools
 
         public void OnConfigParsed(ManzaToolsConfig config)
         {
-            Config = config;
-            Config.AvailibleMaps = _changeMapService.LoadMaps();
-            _smokeTimer.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
-            if(Config.DefaultGameMode != GameModeEnum.Disabled)
-                RegisterListeners();
+            try
+            {
+                Config = config;
+                Config.AvailibleMaps = _changeMapService.LoadMaps();
+                _smokeTimer.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
+                if (Config.DefaultGameMode != GameModeEnum.Disabled) 
+                    RegisterListeners();
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Error {ex.Message}, {ex.StackTrace}");
+            }
 
             Responses.ReplyToServer("ConfigParsed ManzaTools", false, true);
         }
 
         private void RegisterListeners()
         {
+            InitTestPlugin();
             InitSmokeTimer();
             InitChangeMap();
             InitPractice();
@@ -106,7 +116,7 @@ namespace ManzaTools
         private void InitDeathMatch()
         {
             AddCommand("css_deathmatch", "Changes the current GameMode to deathmatch", (player, info) => _deathmatchService.StartDeathmatch(player, info));
-            RegisterEventHandler<EventPlayerDeath>((@event, info) =>  _deathmatchService.HandlePlayerDeath(@event, info));
+            RegisterEventHandler<EventPlayerDeath>((@event, info) => _deathmatchService.HandlePlayerDeath(@event, info));
         }
 
         private void InitChangeMap()
@@ -148,7 +158,7 @@ namespace ManzaTools
 
         private void InitEndround()
         {
-            AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));            
+            AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));
         }
 
         private void InitBots()
@@ -161,7 +171,12 @@ namespace ManzaTools
         {
             AddCommand("css_rcon", "Executes a command on the server", (player, info) => _rconService.Execute(player, info));
         }
-        
+
+        private void InitTestPlugin()
+        {
+            AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => Server.PrintToChatAll("Läuft"));
+        }
+
 
     }
 }

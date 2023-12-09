@@ -1,6 +1,7 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -13,6 +14,7 @@ namespace ManzaTools.Services
     public class BotService : PracticeBaseService
     {
         private IList<PlacedBots> currentPlacedBots = new List<PlacedBots>();
+        private bool botSpawning = false;
 
         public BotService(GameModeService gameModeService)
             : base(gameModeService)
@@ -23,8 +25,30 @@ namespace ManzaTools.Services
         {
             if (!GameModeIsPractice || player == null)
                 return;
+            botSpawning = true;
+            var crouchBot = info.ArgStringAsList().Contains("crouch");
+            byte teamSide=DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
 
-            AddBot(player);
+            AddBot(player, crouchBot, teamSide);
+        }
+
+        private static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
+        {
+            var isCounterTerrorist = argList.Contains("ct");
+            var isTerrorist = argList.Contains("t");
+            if (!isTerrorist && !isCounterTerrorist)
+                return playerTeamNum;
+            return isCounterTerrorist ? (byte)3 : (byte)2;
+        }
+
+        private void AddBot(CCSPlayerController player, bool crouchBot, byte teamNum)
+        {
+            if (PlayerExtension.IsCounterTerrorist(teamNum))
+                Server.ExecuteCommand("bot_add_ct");
+            else
+                Server.ExecuteCommand("bot_add_t");
+
+            Utils.Timer.CreateTimer(0.1f, () => HandleNewBot(player, crouchBot), null);
         }
 
         internal HookResult PositionBotOnRespawn(EventPlayerSpawn @event, GameEventInfo info)
@@ -32,32 +56,24 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice)
                 return HookResult.Continue;
             var bot = @event.Userid;
-            if (!bot.IsBot || bot.IsHLTV)
-                return HookResult.Continue;
+            if (bot.IsValid && bot.IsBot && bot.UserId.HasValue && !bot.IsHLTV)
+            {
+                var placedBot = currentPlacedBots.Where(x => x.Bot.Index == bot.Index).FirstOrDefault();
+                if (placedBot == null)
+                {
+                    if(!botSpawning)
+                        Utils.Timer.CreateTimer(2.5f, () => Server.ExecuteCommand($"bot_kick {bot.PlayerName}"));
+                    return HookResult.Continue;
+                }
 
-            var placedBot = currentPlacedBots.Where(x => x.Bot.Index == bot.Index).FirstOrDefault();
-            if (placedBot == null)
-                return HookResult.Continue;
-
-            SetBotPosition(placedBot.Position, placedBot.Angle, bot);
-
-
+                TeleportBot(placedBot.Position, placedBot.Angle, bot, placedBot.Crouch);
+            }
             return HookResult.Continue;
         }
 
-        private void AddBot(CCSPlayerController player)
+        private void HandleNewBot(CCSPlayerController botOwner, bool crouchBot)
         {
-            if (player.IsCounterTerrorist())
-                Server.ExecuteCommand("bot_add_t");
-            else
-                Server.ExecuteCommand("bot_add_ct");
-
-            Utils.Timer.CreateTimer(0.1f, () => MoveBotToPlayer(player), null);
-        }
-
-        private void MoveBotToPlayer(CCSPlayerController botOwner)
-        {
-            var playerEntities = Utilities.GetPlayers().Where(x => x.IsBot && !x.IsHLTV);
+            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
             var targetPosition = botOwner.PlayerPawn?.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
             var targetViewAngle = botOwner.PlayerPawn?.Value?.CBodyComponent?.SceneNode?.AbsRotation;
             if (targetPosition == null || targetViewAngle == null)
@@ -68,12 +84,12 @@ namespace ManzaTools.Services
                 var alredyExistingBot = currentPlacedBots.FirstOrDefault(x => x.Bot.Index == playerEntity.Index);
                 if (alredyExistingBot != null)
                     continue;
-                SetBotPosition(targetPosition, targetViewAngle, playerEntity);
+                TeleportBot(targetPosition, targetViewAngle, playerEntity, crouchBot);
                 currentPlacedBots.Add(new PlacedBots
                 {
                     Position = new Vector(targetPosition.X, targetPosition.Y, targetPosition.Z),
                     Angle = new QAngle(targetViewAngle.X, targetViewAngle.Y, targetViewAngle.Z),
-                    Crouch = false,
+                    Crouch = crouchBot,
                     PlayerName = playerEntity.PlayerName,
                     Owner = botOwner,
                     Bot = playerEntity
@@ -83,13 +99,18 @@ namespace ManzaTools.Services
 
         }
 
-        private static void SetBotPosition(Vector targetPosition, QAngle targetViewAngle, CCSPlayerController playerEntity)
+        private void TeleportBot(Vector targetPosition, QAngle targetViewAngle, CCSPlayerController playerEntity, bool crouchBot)
         {
             playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
+            playerEntity.PlayerPawn.Value.Flags |= 2;
+            CCSPlayer_MovementServices movementService = new(playerEntity.PlayerPawn.Value.MovementServices!.Handle);
+            Utils.Timer.CreateTimer(0.1f, () => movementService.DuckAmount = 1);
+            Utils.Timer.CreateTimer(0.2f, () => playerEntity.PlayerPawn.Value.Bot.IsCrouching = crouchBot);
+            botSpawning = false;
         }
 
-        //Creds: https://github.com/shobhit-pathak/MatchZy/blob/d6f7d47998d01a739e22618f7016b1d73ada870f/PracticeMode.cs#L778
         private CounterStrikeSharp.API.Modules.Timers.Timer? collisionGroupTimer;
+        //Creds: https://github.com/shobhit-pathak/MatchZy/blob/d6f7d47998d01a739e22618f7016b1d73ada870f/PracticeMode.cs#L778
         public void TemporarilyDisableCollisions(CCSPlayerController p1, CCSPlayerController p2)
         {
             p1.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
