@@ -13,7 +13,7 @@ namespace ManzaTools.Services
             _gameModeService = gameModeService;
         }
 
-        internal void SetPlayerPosition(CCSPlayerController? player, CommandInfo info)
+        internal void ClearUtilities(CCSPlayerController? player, CommandInfo info)
         {
             if (!_gameModeService.IsPractice())
                 return;

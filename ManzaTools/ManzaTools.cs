@@ -69,6 +69,7 @@ namespace ManzaTools
             InitPracticeMatch();
             InitDeathMatch();
             InitSpawn();
+            InitClear();
         }
 
         private void InitPractice()
@@ -106,7 +107,7 @@ namespace ManzaTools
 
         private void InitClear()
         {
-            AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.SetPlayerPosition(player, info));
+            AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.ClearUtilities(player, info));
         }
 
 
