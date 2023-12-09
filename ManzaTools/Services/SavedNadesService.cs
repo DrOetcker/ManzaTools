@@ -18,6 +18,9 @@ namespace ManzaTools.Services
 
         internal void ListNades(CCSPlayerController? player, CommandInfo info)
         {
+            if (!GameModeIsPractice)
+                return;
+
             var savednades = GetExistingNades(Server.MapName);
             if (!savednades.Any())
             {
@@ -66,6 +69,9 @@ namespace ManzaTools.Services
 
         internal void SaveNade(CCSPlayerController? player, CommandInfo info)
         {
+            if (!GameModeIsPractice)
+                return;
+
             if (info.ArgCount == 1)
             {
                 Responses.ReplyToPlayer("Usage: !savenade OhneSpace | \"Mit Space\"", player, true);
@@ -117,6 +123,9 @@ namespace ManzaTools.Services
 
         internal void LoadNade(CCSPlayerController? player, CommandInfo info)
         {
+            if (!GameModeIsPractice)
+                return;
+
             if (info.ArgCount == 1)
             {
                 Responses.ReplyToPlayer("Usage: !loadnade ID | NameOhneSpace | \"Name Mit Space\"", player, true);
@@ -145,7 +154,7 @@ namespace ManzaTools.Services
                 nadeToLoadPlayerPos.Z -= 59;
                 Responses.ReplyToPlayer($"Nade wurde aus Stratsbook importiert. Sollte das Lineup nicht passen, bitte an Oetcker melden!", player);
             }
-            player.PlayerPawn.Value.Teleport(nadeToLoadPlayerPos, nadeToLoadPlayerAngle, new Vector(0,0,0));
+            player.PlayerPawn.Value.Teleport(nadeToLoadPlayerPos, nadeToLoadPlayerAngle, new Vector(0, 0, 0));
 
             switch (savedNade.Type)
             {
@@ -176,17 +185,56 @@ namespace ManzaTools.Services
 
         internal void DeleteNade(CCSPlayerController? player, CommandInfo info)
         {
-            Responses.ReplyToPlayer("DeleteNade", player);
+            if (!GameModeIsPractice)
+                return;
+
+            if (info.ArgCount == 1)
+            {
+                Responses.ReplyToPlayer("Usage: !deletenade ID | NameOhneSpace | \"Name Mit Space\"", player, true);
+                return;
+            }
+            var nadeName = info.ArgByIndex(1);
+            var argIsId = uint.TryParse(nadeName, out var nadeId);
+
+            var savedNades = GetExistingNades(Server.MapName);
+            SavedNade? savedadeToDelete;
+            if (argIsId)
+                savedadeToDelete = savedNades.FirstOrDefault(x => x.Id == nadeId);
+            else
+                savedadeToDelete = savedNades.FirstOrDefault(x => x.Name.ToLower() == nadeName.ToLower());
+
+            if (savedadeToDelete == null)
+            {
+                Responses.ReplyToPlayer($"Could not find nade {nadeName}", player, true);
+                return;
+            }
+
+            savedNades.Remove(savedadeToDelete);
+            File.WriteAllText(savedNadesFilePath, JsonSerializer.Serialize(savedNades));
+
+            Responses.ReplyToServer($"Nade {savedadeToDelete.Name} (Id {savedadeToDelete.Id}) deleted.", true);
+            Responses.ReplyToServer("Details for one last time:");
+            Responses.ReplyToServer($"Name: {savedadeToDelete.Name}");
+            Responses.ReplyToServer($"Type: {savedadeToDelete.Type}");
+            if (!string.IsNullOrEmpty(savedadeToDelete.Description))
+                Responses.ReplyToServer($"Description: {savedadeToDelete.Description}");
+            Responses.ReplyToServer($"Position: {savedadeToDelete.PlayerPosition}");
+            Responses.ReplyToServer($"Angle: {savedadeToDelete.PlayerAngle}");
+            Responses.ReplyToServer($"Teleport: setpos {savedadeToDelete.PlayerPosition}; setang {savedadeToDelete.PlayerAngle}");
+            Responses.ReplyToServer($"Map: {savedadeToDelete.Map}");
         }
 
         internal void UpdateNade(CCSPlayerController? player, CommandInfo info)
         {
+            if (!GameModeIsPractice)
+                return;
+
             Responses.ReplyToPlayer("UpdateNade", player);
         }
 
         private IList<SavedNade> GetExistingNades(string? mapName = null)
         {
-            if(!File.Exists(savedNadesFilePath)) 
+            if (!File.Exists(savedNadesFilePath))
                 return new List<SavedNade>();
 
             string existingNadesJson = File.ReadAllText(savedNadesFilePath);
