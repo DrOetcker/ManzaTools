@@ -80,7 +80,7 @@ namespace ManzaTools
             }
             catch (Exception ex)
             {
-                Logging.Log($"Error {ex.Message}, {ex.StackTrace}");
+                Logging.Fatal(ex, nameof(ManzaTools), nameof(OnConfigParsed));
             }
 
             Responses.ReplyToServer("ConfigParsed ManzaTools", false, true);

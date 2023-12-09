@@ -117,7 +117,7 @@ namespace ManzaTools.Services
             }
             catch (JsonException ex)
             {
-                Logging.Log($"Error handling JSON: {ex.Message}");
+                Logging.Fatal(ex, nameof(SavedNade), nameof(SaveNade));
             }
         }
 

@@ -45,7 +45,7 @@ namespace ManzaTools.Services
             }
             catch(Exception ex)
             {
-                Logging.Log($"Error {ex.Message}");
+                Logging.Fatal(ex, nameof(CfgShipperService), nameof(InitCfg));
             }
             Responses.ReplyToServer($"Init of {cfgFileName} done", false, true);
         }

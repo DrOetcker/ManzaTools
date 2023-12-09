@@ -67,9 +67,9 @@ namespace ManzaTools.Services
                     }
                     return loadedMaps;
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Logging.Log($"[LoadMaps FATAL] An error occurred: {e.Message}");
+                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(LoadMaps));
                     return new List<Map>();
                 }
             }
@@ -110,9 +110,9 @@ namespace ManzaTools.Services
                     Logging.Log("[LoadMaps] Created a new JSON file with default content.");
                     return defaultMaps;
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Logging.Log($"[LoadMaps FATAL] Error creating the JSON file: {e.Message}");
+                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(LoadMaps));
                     return new List<Map>();
                 }
             }
