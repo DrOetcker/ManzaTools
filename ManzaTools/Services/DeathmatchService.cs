@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using ManzaTools.Models;
+using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
 {
@@ -35,25 +36,13 @@ namespace ManzaTools.Services
             if (_gameModeService.CurrentGameMode != GameModeEnum.Deathmatch)
                 return HookResult.Continue;
 
-            var attacker = @event.Attacker;
-            var activeWeapon = attacker.PlayerPawn.Value.WeaponServices.ActiveWeapon;
+            var activeWeapon = @event.Attacker.PlayerPawn.Value.WeaponServices.ActiveWeapon;
             if (activeWeapon != null)
             {
                 activeWeapon.Value.Clip1 = 250;
                 activeWeapon.Value.ReserveAmmo[0] = 250;
             }
-            //untested
-            //Server.PrintToChatAll($"Incl health");
-            //@event.Attacker.PlayerPawn.Value.Health += 20;
-            //@event.Attacker.Health += 20;
-            //info.DontBroadcast = false;
 
-            //NativeAPI.FireEventToClient("ammo_refill", @event.Attacker.Index);
-            //@event.FireEventToClient(@event.Attacker.OriginalControllerOfCurrentPawn.Value);
-            //@event.Attacker.OriginalControllerOfCurrentPawn.Value.Fire
-            //@event.Attacker.Pawn
-            //@event.Attacker.PlayerPawn.Value.event
-            Server.PrintToChatAll($"{@event.Attacker.PlayerName} killed {@event.Userid.PlayerName}");
             return HookResult.Continue;
         }
     }
