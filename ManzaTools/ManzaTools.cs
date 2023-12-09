@@ -26,6 +26,7 @@ namespace ManzaTools
         private readonly RethrowService _rethrowService;
         private readonly EndRoundService _endRoundService;
         private readonly SavedNadesService _savedNadesService;
+        private readonly BotService _botService;
 
         public ManzaTools(CfgShipperService cfgShipper, 
             GameModeService gameModeService, 
@@ -37,7 +38,8 @@ namespace ManzaTools
             RconService rconService,
             RethrowService rethrowService,
             EndRoundService endRoundService,
-            SavedNadesService savedNadesService)
+            SavedNadesService savedNadesService,
+            BotService botService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -50,6 +52,7 @@ namespace ManzaTools
             _rethrowService = rethrowService;
             _endRoundService = endRoundService;
             _savedNadesService = savedNadesService;
+            _botService = botService;
         }
 
         public override void Load(bool hotReload)
@@ -87,6 +90,7 @@ namespace ManzaTools
             InitRethrow();
             InitEndround();
             InitSavedNades();
+            InitBots();
         }
 
         private void InitPractice()
@@ -144,7 +148,13 @@ namespace ManzaTools
 
         private void InitEndround()
         {
-            AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));  
+            AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));            
+        }
+
+        private void InitBots()
+        {
+            AddCommand("css_bot", "Places a bot with given params", (player, info) => _botService.CreateBot(player, info));
+            RegisterEventHandler<EventPlayerSpawn>((@event, info) => _botService.PositionBotOnRespawn(@event, info));
         }
 
         private void InitRcon()
