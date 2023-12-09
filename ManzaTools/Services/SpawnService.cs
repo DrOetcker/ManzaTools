@@ -22,7 +22,6 @@ namespace ManzaTools.Services
             _gameModeService = gameModeService;
             CtSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
             TSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
-           
         }
 
         internal void SetPlayerPosition(CCSPlayerController? player, CommandInfo info)
