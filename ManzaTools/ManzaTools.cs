@@ -24,6 +24,7 @@ namespace ManzaTools
         private readonly ClearService _clearService;
         private readonly RconService _rconService;
         private readonly RethrowService _rethrowService;
+        private readonly EndRoundService _endRoundService;
 
         public ManzaTools(CfgShipperService cfgShipper, 
             GameModeService gameModeService, 
@@ -33,7 +34,8 @@ namespace ManzaTools
             SpawnService spawnService,
             ClearService clearService,
             RconService rconService,
-            RethrowService rethrowService)
+            RethrowService rethrowService,
+            EndRoundService endRoundService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -44,6 +46,7 @@ namespace ManzaTools
             _clearService = clearService;
             _rconService = rconService;
             _rethrowService = rethrowService;
+            _endRoundService = endRoundService;
         }
 
         public override void Load(bool hotReload)
@@ -79,6 +82,7 @@ namespace ManzaTools
             InitClear();
             InitRcon();
             InitRethrow();
+            InitEndround();
         }
 
         private void InitPractice()
@@ -100,7 +104,22 @@ namespace ManzaTools
         private void InitChangeMap()
         {
             AddCommand("css_changeMap", "Changes the current Map", (player, info) => _changeMapService.Changemap(player, info, Config.AvailibleMaps));
-            RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));            
+            RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));
+        }
+
+        private void InitClear()
+        {
+            AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.ClearUtilities(player, info));
+        }
+
+        private void InitRethrow()
+        {
+            AddCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", (player, info) => _rethrowService.Rethrow(player, info));
+        }
+
+        private void InitSpawn()
+        {
+            AddCommand("css_spawn", "Sets the spawn of a player", (player, info) => _spawnService.SetPlayerPosition(player, info));
         }
 
         private void InitSmokeTimer()
@@ -110,24 +129,14 @@ namespace ManzaTools
             AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _smokeTimer.ToggleSmokeTimer(player, info));
         }
 
-        private void InitSpawn()
+        private void InitEndround()
         {
-            AddCommand("css_spawn", "Sets the spawn of a player", (player, info) => _spawnService.SetPlayerPosition(player, info));
-        }
-
-        private void InitClear()
-        {
-            AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.ClearUtilities(player, info));
+            AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));  
         }
 
         private void InitRcon()
         {
             AddCommand("css_rcon", "Executes a command on the server", (player, info) => _rconService.Execute(player, info));
-        }
-
-        private void InitRethrow()
-        {
-            AddCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", (player, info) => _rethrowService.Rethrow(player, info));
         }
 
 

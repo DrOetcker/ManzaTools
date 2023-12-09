@@ -1,4 +1,6 @@
-﻿namespace ManzaTools.Services
+﻿using ManzaTools.Models;
+
+namespace ManzaTools.Services
 {
     public class PracticeBaseService
     {
@@ -9,5 +11,6 @@
         }
 
         internal bool GameModeIsPractice => _gameModeService.IsPractice();
+        internal bool GameModeIsPracticeMatch => _gameModeService.CurrentGameMode == GameModeEnum.PracticeMatch;
     }
 }
