@@ -61,6 +61,7 @@ namespace ManzaTools
         {
             Config = config;
             Config.AvailibleMaps = _changeMapService.LoadMaps();
+            _smokeTimer.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
             if(Config.DefaultGameMode != GameModeEnum.Disabled)
                 RegisterListeners();
 
@@ -104,8 +105,9 @@ namespace ManzaTools
 
         private void InitSmokeTimer()
         {
-            RegisterListener((Listeners.OnEntitySpawned)(entity => _smokeTimer.OnEntitySpawn(entity, Config.SmokeTimerEnabled)));
-            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _smokeTimer.OnSmokeGrenadeDetonate(@event, info, Config.SmokeTimerEnabled));
+            RegisterListener((Listeners.OnEntitySpawned)(entity => _smokeTimer.OnEntitySpawn(entity)));
+            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _smokeTimer.OnSmokeGrenadeDetonate(@event, info));
+            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _smokeTimer.ToggleSmokeTimer(player, info));
         }
 
         private void InitSpawn()
