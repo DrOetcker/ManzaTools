@@ -164,6 +164,8 @@ namespace ManzaTools
         private void InitBots()
         {
             AddCommand("css_bot", "Places a bot with given params", (player, info) => _botService.CreateBot(player, info));
+            AddCommand("css_bot_kick", "Removes a single bots", (player, info) => _botService.RemoveBot(player, info));
+            AddCommand("css_bots_kick", "Removes all bots", (player, info) => _botService.RemoveBots(player, info));
             RegisterEventHandler<EventPlayerSpawn>((@event, info) => _botService.PositionBotOnRespawn(@event, info));
         }
 

@@ -27,9 +27,36 @@ namespace ManzaTools.Services
                 return;
             botSpawning = true;
             var crouchBot = info.ArgStringAsList().Contains("crouch");
-            byte teamSide=DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
+            byte teamSide = DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
 
             AddBot(player, crouchBot, teamSide);
+        }
+
+        internal void RemoveBots(CCSPlayerController? player, CommandInfo info)
+        {
+            if (!GameModeIsPractice || player == null)
+                return;
+
+            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
+            foreach (var playerEntity in playerEntities)
+                Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
+        }
+
+        internal void RemoveBot(CCSPlayerController? player, CommandInfo info)
+        {
+            if (!GameModeIsPractice || player == null)
+                return;
+
+            var botToKick = info.ArgByIndex(1);
+
+            var playerEntitiy = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
+            if (playerEntitiy == null)
+            {
+                player.PrintToChat($"Not bot named {botToKick} found.");
+                return;
+            }
+
+            Server.ExecuteCommand($"bot_kick {playerEntitiy.PlayerName}");
         }
 
         private static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
@@ -61,7 +88,7 @@ namespace ManzaTools.Services
                 var placedBot = currentPlacedBots.Where(x => x.Bot.Index == bot.Index).FirstOrDefault();
                 if (placedBot == null)
                 {
-                    if(!botSpawning)
+                    if (!botSpawning)
                         Utils.Timer.CreateTimer(2.5f, () => Server.ExecuteCommand($"bot_kick {bot.PlayerName}"));
                     return HookResult.Continue;
                 }
