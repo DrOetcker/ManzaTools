@@ -20,13 +20,13 @@ namespace ManzaTools.Services
             if (info?.ArgCount > 1)
             {
                 if (info.ArgString.ToLower().Contains("nobots"))
-                    Server.ExecuteCommand("exec nobots.cfg");
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmNoBots.cfg")}");
                 if (info.ArgString.ToLower().Contains("hsonly"))
-                    Server.ExecuteCommand("exec hsonly.cfg");
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmHsOnly.cfg")}");
                 if (info.ArgString.ToLower().Contains("pistol"))
-                    Server.ExecuteCommand("exec pistolsonly.cfg");
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmPistolsOnly.cfg")}");
                 if (info.ArgString.ToLower().Contains("team"))
-                    Server.ExecuteCommand("exec teamdm.cfg");
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmTeamDm.cfg")}");
             }
         }
 

@@ -14,6 +14,18 @@
       <None Update="initCfgs\deathMatch.cfg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="initCfgs\dmHsOnly.cfg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="initCfgs\dmNoBots.cfg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="initCfgs\dmPistolsOnly.cfg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="initCfgs\dmTeamDm.cfg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="initCfgs\practiceMatch.cfg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

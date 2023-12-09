@@ -13,22 +13,26 @@ namespace ManzaTools.Services
                 Directory.CreateDirectory(Statics.CfgPath);
 
             var initCfgDirectory = Path.Combine(modulePath, "initCfgs");
-            InitCfg(modulePath, initCfgDirectory, GameModeEnum.Practice);
-            InitCfg(modulePath, initCfgDirectory, GameModeEnum.PracticeMatch);
-            InitCfg(modulePath, initCfgDirectory, GameModeEnum.Deathmatch);
+            InitCfg(modulePath, initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.Practice]);
+            InitCfg(modulePath, initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.PracticeMatch]);
+            InitCfg(modulePath, initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.Deathmatch]);
+            InitCfg(modulePath, initCfgDirectory, "dmHsOnly.cfg");
+            InitCfg(modulePath, initCfgDirectory, "dmNoBots.cfg");
+            InitCfg(modulePath, initCfgDirectory, "dmPistolsOnly.cfg");
+            InitCfg(modulePath, initCfgDirectory, "dmTeamDm.cfg");
             if (Directory.Exists(initCfgDirectory))
                 Directory.Delete(initCfgDirectory, true);
         }
 
-        private void InitCfg(string modulePath, string initCfgDirectory, GameModeEnum gameMode)
+        private void InitCfg(string modulePath, string initCfgDirectory, string cfgFileName)
         {
-            var cfgPath = Path.Combine(Statics.CfgPath, Statics.GameModeCfgs[gameMode]);
+            var cfgPath = Path.Combine(Statics.CfgPath, cfgFileName);
             //If config already exists dont override it!
             if (File.Exists(cfgPath))
                 return;
 
 
-            var initCfgPath = Path.Combine(initCfgDirectory, Statics.GameModeCfgs[gameMode]);
+            var initCfgPath = Path.Combine(initCfgDirectory, cfgFileName);
 
             using (StreamReader fileReader = File.OpenText(initCfgPath))
             {
@@ -37,7 +41,7 @@ namespace ManzaTools.Services
                 using(StreamWriter fileWriter = File.CreateText(cfgPath))
                     fileWriter.Write(cfgContent);
             }
-            Responses.ReplyToServer($"Init of cfg {Statics.GameModeCfgs[gameMode]} done", false, true);
+            Responses.ReplyToServer($"Init of {cfgFileName} done", false, true);
         }
     }
 }
