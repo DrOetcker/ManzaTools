@@ -15,9 +15,9 @@ namespace ManzaTools
         public override string ModuleVersion => "0.1.0";
 
         public ManzaToolsConfig Config { get; set; } = new();
-        private readonly CfgShipper _cfgShipper;
+        private readonly CfgShipperService _cfgShipper;
         private readonly GameModeService _gameModeService;
-        private readonly SmokeTimer _smokeTimer;
+        private readonly SmokeTimerService _smokeTimer;
         private readonly ChangeMapService _changeMapService;
         private readonly DeathmatchService _deathmatchService;
         private readonly SpawnService _spawnService;
@@ -25,11 +25,11 @@ namespace ManzaTools
         private readonly RconService _rconService;
         private readonly RethrowService _rethrowService;
 
-        public ManzaTools(CfgShipper cfgShipper, 
+        public ManzaTools(CfgShipperService cfgShipper, 
             GameModeService gameModeService, 
             ChangeMapService changeMapService, 
             DeathmatchService deathmatchService,
-            SmokeTimer smokeTimer, 
+            SmokeTimerService smokeTimer, 
             SpawnService spawnService,
             ClearService clearService,
             RconService rconService,

@@ -8,9 +8,9 @@ namespace ManzaTools
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<CfgShipper>();
+            serviceCollection.AddSingleton<CfgShipperService>();
             serviceCollection.AddSingleton<GameModeService>();
-            serviceCollection.AddSingleton<SmokeTimer>();
+            serviceCollection.AddSingleton<SmokeTimerService>();
             serviceCollection.AddSingleton<ChangeMapService>(); 
             serviceCollection.AddSingleton<DeathmatchService>(); 
             serviceCollection.AddSingleton<SpawnService>();

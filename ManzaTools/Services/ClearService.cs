@@ -4,18 +4,16 @@ using CounterStrikeSharp.API.Modules.Commands;
 
 namespace ManzaTools.Services
 {
-    public class ClearService
+    public class ClearService : PracticeBaseService
     {
-        private readonly GameModeService _gameModeService;
-
         public ClearService(GameModeService gameModeService)
+            : base(gameModeService)
         {
-            _gameModeService = gameModeService;
         }
 
         internal void ClearUtilities(CCSPlayerController? player, CommandInfo info)
         {
-            if (!_gameModeService.IsPractice())
+            if (!GameModeIsPractice)
                 return;
             var smokes = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("smokegrenade_projectile");
             foreach (var smoke in smokes)

@@ -4,17 +4,16 @@ using CounterStrikeSharp.API.Modules.Commands;
 
 namespace ManzaTools.Services
 {
-    public class RethrowService
+    public class RethrowService : PracticeBaseService
     {
-        private readonly GameModeService _gameModeService;
-
         public RethrowService(GameModeService gameModeService)
+            : base(gameModeService)
         {
-            _gameModeService = gameModeService;
         }
+
         internal void Rethrow(CCSPlayerController? player, CommandInfo info)
         {
-            if (!_gameModeService.IsPractice())
+            if (!GameModeIsPractice)
                 return;
             Server.ExecuteCommand("sv_rethrow_last_grenade");
         }

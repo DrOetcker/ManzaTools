@@ -4,19 +4,17 @@ using ManzaTools.Utils;
 
 namespace ManzaTools.Services
 {
-    public class SmokeTimer
+    public class SmokeTimerService : PracticeBaseService
     {
-
         private IList<ThrownGrenade> thrownGrenadeList = new List<ThrownGrenade>();
-        private readonly GameModeService _gameModeService;
-        public SmokeTimer(GameModeService gameModeService)
+        public SmokeTimerService(GameModeService gameModeService)
+            : base(gameModeService)
         {
-            _gameModeService = gameModeService;
         }
 
         public void OnEntitySpawn(CEntityInstance entity, bool smokeTimerEnabled)
         {
-            if (!smokeTimerEnabled || !_gameModeService.IsPractice())
+            if (!smokeTimerEnabled || !GameModeIsPractice)
                 return;
             if (entity.DesignerName != "smokegrenade_projectile")
                 return;
@@ -26,7 +24,7 @@ namespace ManzaTools.Services
 
         public HookResult OnSmokeGrenadeDetonate(EventSmokegrenadeDetonate @event, GameEventInfo info, bool smokeTimerEnabled)
         {
-            if (!smokeTimerEnabled || !_gameModeService.IsPractice())
+            if (!smokeTimerEnabled || !GameModeIsPractice)
                 return HookResult.Continue;
 
             var foundGrenade = thrownGrenadeList.SingleOrDefault(x => x.Index == @event.Entityid);
@@ -34,7 +32,7 @@ namespace ManzaTools.Services
             {
                 //Detonate is somehow pretty early. Add 750ms to be more relalistic
                 var timeSpan = DateTime.UtcNow - foundGrenade.ThrownAt + new TimeSpan(0, 0, 0, 0, 750);
-                if(@event.Userid.IsValid)
+                if (@event.Userid.IsValid)
                     Responses.ReplyToPlayer($"Smoke landed after: {Math.Round((timeSpan.TotalMilliseconds / 1000), 1)} seconds", @event.Userid, false, false);
                 thrownGrenadeList.Remove(foundGrenade);
             }

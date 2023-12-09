@@ -4,7 +4,7 @@ using ManzaTools.Utils;
 
 namespace ManzaTools.Services
 {
-    public class CfgShipper
+    public class CfgShipperService
     {
         
         public void InitDefaultCfgs(string modulePath)
