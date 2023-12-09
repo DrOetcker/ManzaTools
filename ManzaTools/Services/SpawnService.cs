@@ -20,6 +20,7 @@ namespace ManzaTools.Services
         public SpawnService(GameModeService gameModeService)
         {
             _gameModeService = gameModeService;
+            return;
             CtSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
             TSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
            

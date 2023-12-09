@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Config;
 using CounterStrikeSharp.API.Modules.Entities;
 using ManzaTools.Config;
 using ManzaTools.Models;
@@ -42,8 +43,6 @@ namespace ManzaTools
         public override void Load(bool hotReload)
         {
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
-            _gameModeService.LoadGameMode(_gameModeService.CurrentGameMode);
-            RegisterListeners();
             Responses.ReplyToServer("Loaded ManzaTools", false, true);
         }
 
@@ -56,6 +55,9 @@ namespace ManzaTools
         {
             Config = config;
             Config.AvailibleMaps = _changeMapService.LoadMaps();
+            if(Config.DefaultGameMode != GameModeEnum.Disabled)
+                RegisterListeners();
+
             Responses.ReplyToServer("ConfigParsed ManzaTools", false, true);
         }
 
