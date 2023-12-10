@@ -7,6 +7,8 @@ namespace ManzaTools.Config
     {
         public GameModeEnum DefaultGameMode { get; set; } = GameModeEnum.Disabled;
         public bool SmokeTimerEnabled { get; set; } = true;
+        public bool BlindTimerEnabled { get; set; } = true;
+        public bool DamageReportEnabled { get; set; } = true;
         public IList<Map> AvailibleMaps { get; set; } = new List<Map>();
     }
 }

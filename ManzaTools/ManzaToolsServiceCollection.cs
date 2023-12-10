@@ -10,7 +10,7 @@ namespace ManzaTools
         {
             serviceCollection.AddSingleton<CfgShipperService>();
             serviceCollection.AddSingleton<GameModeService>();
-            serviceCollection.AddSingleton<SmokeTimerService>();
+            serviceCollection.AddSingleton<EffektService>();
             serviceCollection.AddSingleton<ChangeMapService>(); 
             serviceCollection.AddSingleton<DeathmatchService>(); 
             serviceCollection.AddSingleton<SpawnService>();

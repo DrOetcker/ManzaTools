@@ -1,7 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -52,7 +51,7 @@ namespace ManzaTools.Services
             var playerEntitiy = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
             if (playerEntitiy == null)
             {
-                player.PrintToChat($"Not bot named {botToKick} found.");
+                player.PrintToChat($"Not bot named \"{botToKick}\" found.");
                 return;
             }
 
@@ -61,11 +60,10 @@ namespace ManzaTools.Services
 
         private static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
         {
-            var isCounterTerrorist = argList.Contains("ct");
-            var isTerrorist = argList.Contains("t");
-            if (!isTerrorist && !isCounterTerrorist)
-                return playerTeamNum;
-            return isCounterTerrorist ? (byte)3 : (byte)2;
+            byte? ctNum = argList.Contains("ct") ? PlayerExtension.TeamToTeamNum("ct") : null;
+            byte? tNum = argList.Contains("t") ? PlayerExtension.TeamToTeamNum("t") : null;
+
+            return ctNum ?? tNum ?? (PlayerExtension.IsCounterTerrorist(playerTeamNum) ? (byte)2 : (byte)3);
         }
 
         private void AddBot(CCSPlayerController player, bool crouchBot, byte teamNum)

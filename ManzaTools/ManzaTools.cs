@@ -1,7 +1,5 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Config;
-using CounterStrikeSharp.API.Modules.Entities;
 using ManzaTools.Config;
 using ManzaTools.Models;
 using ManzaTools.Services;
@@ -18,7 +16,7 @@ namespace ManzaTools
         public ManzaToolsConfig Config { get; set; } = new();
         private readonly CfgShipperService _cfgShipper;
         private readonly GameModeService _gameModeService;
-        private readonly SmokeTimerService _smokeTimer;
+        private readonly EffektService _effektService;
         private readonly ChangeMapService _changeMapService;
         private readonly DeathmatchService _deathmatchService;
         private readonly SpawnService _spawnService;
@@ -31,7 +29,7 @@ namespace ManzaTools
 
         public ManzaTools(CfgShipperService cfgShipper,
             GameModeService gameModeService,
-            SmokeTimerService smokeTimer,
+            EffektService effektService,
             ChangeMapService changeMapService,
             DeathmatchService deathmatchService,
             SpawnService spawnService,
@@ -45,7 +43,7 @@ namespace ManzaTools
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
-            _smokeTimer = smokeTimer;
+            _effektService = effektService;
             _changeMapService = changeMapService;
             _deathmatchService = deathmatchService;
             _spawnService = spawnService;
@@ -74,8 +72,10 @@ namespace ManzaTools
             {
                 Config = config;
                 Config.AvailibleMaps = _changeMapService.LoadMaps();
-                _smokeTimer.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
-                if (Config.DefaultGameMode != GameModeEnum.Disabled) 
+                _effektService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
+                _effektService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
+                _effektService.SetDamageReportEnabled(Config.DamageReportEnabled);
+                if (Config.DefaultGameMode != GameModeEnum.Disabled)
                     RegisterListeners();
             }
             catch (Exception ex)
@@ -89,7 +89,7 @@ namespace ManzaTools
         private void RegisterListeners()
         {
             InitTestPlugin();
-            InitSmokeTimer();
+            InitEffectTimers();
             InitChangeMap();
             InitPractice();
             InitPracticeMatch();
@@ -140,11 +140,15 @@ namespace ManzaTools
             AddCommand("css_spawn", "Sets the spawn of a player", (player, info) => _spawnService.SetPlayerPosition(player, info));
         }
 
-        private void InitSmokeTimer()
+        private void InitEffectTimers()
         {
-            RegisterListener((Listeners.OnEntitySpawned)(entity => _smokeTimer.OnEntitySpawn(entity)));
-            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _smokeTimer.OnSmokeGrenadeDetonate(@event, info));
-            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _smokeTimer.ToggleSmokeTimer(player, info));
+            RegisterListener((Listeners.OnEntitySpawned)(entity => _effektService.OnEntitySpawn(entity)));
+            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _effektService.OnSmokeGrenadeDetonate(@event, info));
+            RegisterEventHandler<EventPlayerBlind>((@event, info) => _effektService.OnPlayerBlind(@event, info));
+            RegisterEventHandler<EventPlayerHurt>((@event, info) => _effektService.OnPlayerDamage(@event, info));
+            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _effektService.ToggleSmokeTimer(player, info));
+            AddCommand("css_blindtimer", "Toggles the BlindTimer", (player, info) => _effektService.ToggleBlindTimerTimer(player, info));
+            AddCommand("css_damageReport", "Toggles the DamageReport", (player, info) => _effektService.ToggleBlindTimerTimer(player, info));
         }
 
         private void InitSavedNades()
@@ -176,7 +180,7 @@ namespace ManzaTools
 
         private void InitTestPlugin()
         {
-            AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => Server.PrintToChatAll("Läuft"));
+            AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => Responses.ReplyToPlayer("Läuft", player));
         }
 
 

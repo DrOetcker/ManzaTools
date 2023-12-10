@@ -9,21 +9,15 @@ namespace ManzaTools.Services
 {
     public class SpawnService : PracticeBaseService
     {
-        //TeamNum 3 = CT
-        public IList<SpawnPoint> CtSpawns { get; }
-
-        //TeamNum 2 = T
-        public IList<SpawnPoint> TSpawns { get; }
-
         public SpawnService(GameModeService gameModeService)
             : base(gameModeService)
         {
-            CtSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
-            TSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
         }
 
         internal void SetPlayerPosition(CCSPlayerController? player, CommandInfo info)
         {
+            var ctSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
+            var tSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
             if (!GameModeIsPractice)
                 return;
 
@@ -34,7 +28,7 @@ namespace ManzaTools.Services
             }
             var teamArg = info.ArgByIndex(2);
             var teamNum = string.IsNullOrEmpty(teamArg) ? player.TeamNum : (teamArg.ToLower() == "t" ? (byte)2 : (byte)3);
-            var spawn = PlayerExtension.IsCounterTerrorist(teamNum) ? CtSpawns[spawnId - 1] : TSpawns[spawnId - 1];
+            var spawn = PlayerExtension.IsCounterTerrorist(teamNum) ? ctSpawns[spawnId - 1] : tSpawns[spawnId - 1];
             if(spawn.CBodyComponent?.SceneNode != null && player?.PlayerPawn?.Value != null)
                 player.PlayerPawn.Value.Teleport(spawn.CBodyComponent.SceneNode.AbsOrigin, spawn.CBodyComponent.SceneNode.AbsRotation, new Vector(0, 0, 0));
 
