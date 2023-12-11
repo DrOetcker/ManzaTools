@@ -1,5 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 
 namespace ManzaTools.Utils
 {
@@ -20,6 +20,5 @@ namespace ManzaTools.Utils
             else
                 Server.PrintToChatAll(Statics.GetChatText(message, isError));
         }
-
     }
 }

@@ -1,16 +1,22 @@
-﻿using ManzaTools.Models;
+﻿using ManzaTools.Interfaces;
+using ManzaTools.Models;
+
+using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
 {
-    public class PracticeBaseService
+    public class PracticeBaseService : BaseService, IPracticeBaseService
     {
-        private readonly GameModeService _gameModeService;
-        public PracticeBaseService(GameModeService gameModeService)
+        private readonly IGameModeService _gameModeService;
+
+        public PracticeBaseService(ILogger<PracticeBaseService> loggerService, IGameModeService gameModeService)
+        : base(loggerService)
         {
             _gameModeService = gameModeService;
         }
 
-        internal bool GameModeIsPractice => _gameModeService.IsPractice();
-        internal bool GameModeIsPracticeMatch => _gameModeService.CurrentGameMode == GameModeEnum.PracticeMatch;
+        public bool GameModeIsPractice => _gameModeService.IsPractice();
+
+        public bool GameModeIsPracticeMatch => _gameModeService.CurrentGameMode == GameModeEnum.PracticeMatch;
     }
 }

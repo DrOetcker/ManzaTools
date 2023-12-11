@@ -2,30 +2,34 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 
+using ManzaTools.Interfaces;
+
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools.Services
 {
-    public class ClearService : PracticeBaseService
+    public class ClearService : PracticeBaseService, IClearService
     {
-        public ClearService(GameModeService gameModeService)
-            : base(gameModeService)
+        public ClearService(ILogger<ClearService> logger, IGameModeService gameModeService)
+            : base(logger, gameModeService)
         {
         }
 
-        internal void ClearUtilities(CCSPlayerController? player, CommandInfo info)
+        public void ClearUtilities(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPractice)
                 return;
             var smokes = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("smokegrenade_projectile");
             foreach (var smoke in smokes)
-                smoke?.Remove();
+                smoke.Remove();
 
             var mollys = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("molotov_projectile");
             foreach (var molly in mollys)
-                molly?.Remove();
+                molly.Remove();
 
             var fires = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("inferno");
             foreach (var fire in fires)
-                fire?.Remove();
+                fire.Remove();
         }
     }
 }
