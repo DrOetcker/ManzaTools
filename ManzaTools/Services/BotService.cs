@@ -21,7 +21,7 @@ namespace ManzaTools.Services
         private CounterStrikeSharp.API.Modules.Timers.Timer? collisionGroupTimer;
         private readonly IList<PlacedBots> currentPlacedBots = new List<PlacedBots>();
 
-        protected BotService(ILogger<BotService> logger, IGameModeService gameModeService)
+        public BotService(ILogger<BotService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }
@@ -176,7 +176,7 @@ namespace ManzaTools.Services
             {
                 if (!botOwnerPlayerPawn.IsValid || !botPlayerPawn.IsValid || !botOwnerPlayerPawn.Value.IsValid || !botPlayerPawn.Value.IsValid)
                 {
-                    Logging.Log($"player handle invalid p1p {botOwnerPlayerPawn.Value.IsValid} p2p {botPlayerPawn.Value.IsValid}");
+                    _logger.LogError($"player handle invalid p1p {botOwnerPlayerPawn.Value.IsValid} p2p {botPlayerPawn.Value.IsValid}");
                     collisionGroupTimer?.Kill();
                     return;
                 }

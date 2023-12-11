@@ -17,7 +17,7 @@ namespace ManzaTools.Services
     {
         private static readonly string savedNadesFilePath = Path.Join(Statics.CfgPath, "savedNades.json");
 
-        protected SavedNadesService(ILogger<SavedNadesService> logger, IGameModeService gameModeService)
+        public SavedNadesService(ILogger<SavedNadesService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }
@@ -218,7 +218,7 @@ namespace ManzaTools.Services
             }
             catch (JsonException ex)
             {
-                Logging.Fatal(ex, nameof(SavedNade), nameof(SaveNade));
+                _logger.LogError("Could not save nade", ex);
             }
         }
 

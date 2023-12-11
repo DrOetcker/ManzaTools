@@ -7,7 +7,7 @@ namespace ManzaTools.Services
     {
         protected readonly ILogger _logger;
 
-        protected BaseService(ILogger logger)
+        public BaseService(ILogger logger)
         {
             _logger = logger;
         }

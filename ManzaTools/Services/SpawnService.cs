@@ -13,7 +13,7 @@ namespace ManzaTools.Services
 {
     public class SpawnService : PracticeBaseService, ISpawnService
     {
-        protected SpawnService(ILogger<SpawnService> logger, IGameModeService gameModeService)
+        public SpawnService(ILogger<SpawnService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }

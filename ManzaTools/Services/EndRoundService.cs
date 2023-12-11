@@ -11,7 +11,7 @@ namespace ManzaTools.Services
 {
     public class EndRoundService : PracticeBaseService, IEndRoundService
     {
-        protected EndRoundService(ILogger<EndRoundService> logger, IGameModeService gameModeService)
+        public EndRoundService(ILogger<EndRoundService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }

@@ -13,7 +13,7 @@ namespace ManzaTools.Services
     {
         private readonly IGameModeService _gameModeService;
 
-        protected DeathmatchService(ILogger<DeathmatchService> logger, IGameModeService gameModeService)
+        public DeathmatchService(ILogger<DeathmatchService> logger, IGameModeService gameModeService)
         : base(logger)
         {
             _gameModeService = gameModeService;

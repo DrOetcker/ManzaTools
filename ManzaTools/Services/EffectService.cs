@@ -17,7 +17,7 @@ namespace ManzaTools.Services
         private bool _smokeTimerEnabled;
         private readonly IList<ThrownGrenade> thrownGrenadeList = new List<ThrownGrenade>();
 
-        protected EffectService(ILogger<EffectService> logger, IGameModeService gameModeService)
+        public EffectService(ILogger<EffectService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }

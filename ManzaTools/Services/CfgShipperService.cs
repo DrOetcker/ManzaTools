@@ -8,7 +8,7 @@ namespace ManzaTools.Services
 {
     public class CfgShipperService : BaseService, ICfgShipperService
     {
-        protected CfgShipperService(ILogger<CfgShipperService> logger)
+        public CfgShipperService(ILogger<CfgShipperService> logger)
             : base(logger)
         {
         }
@@ -49,7 +49,7 @@ namespace ManzaTools.Services
             }
             catch (Exception ex)
             {
-                Logging.Fatal(ex, nameof(CfgShipperService), nameof(InitCfg));
+                _logger.LogError($"Could not init Cfg {cfgFileName}", ex);
             }
             Responses.ReplyToServer($"Init of {cfgFileName} done", false, true);
         }

@@ -11,7 +11,7 @@ namespace ManzaTools.Services
 {
     public class RconService : BaseService, IRconService
     {
-        protected RconService(ILogger<RconService> logger)
+        public RconService(ILogger<RconService> logger)
             : base(logger)
         {
         }

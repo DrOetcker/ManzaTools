@@ -10,7 +10,7 @@ namespace ManzaTools.Services
 {
     public class ClearService : PracticeBaseService, IClearService
     {
-        protected ClearService(ILogger<ClearService> logger, IGameModeService gameModeService)
+        public ClearService(ILogger<ClearService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }

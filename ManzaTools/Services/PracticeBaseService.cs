@@ -9,7 +9,7 @@ namespace ManzaTools.Services
     {
         private readonly IGameModeService _gameModeService;
 
-        protected PracticeBaseService(ILogger<PracticeBaseService> loggerService, IGameModeService gameModeService)
+        public PracticeBaseService(ILogger<PracticeBaseService> loggerService, IGameModeService gameModeService)
         : base(loggerService)
         {
             _gameModeService = gameModeService;

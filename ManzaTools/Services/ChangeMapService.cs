@@ -14,7 +14,7 @@ namespace ManzaTools.Services
 {
     public class ChangeMapService : BaseService, IChangeMapService
     {
-        protected ChangeMapService(ILogger<ChangeMapService> logger)
+        public ChangeMapService(ILogger<ChangeMapService> logger)
             : base(logger)
         {
         }
@@ -63,14 +63,17 @@ namespace ManzaTools.Services
                             loadedMaps = JsonSerializer.Deserialize<List<Map>>(jsonContent) ?? new List<Map>();
 
                     }
+                    var maps = "Available Maps: \r\n";
                     foreach (var map in loadedMaps)
-                        Logging.Log($"[PreLoadAvailableMaps] Available Maps: {map.Name}, Id: {map.Id}");
+                        maps += $"{map.Name}{(map.Id != null ? $", WorkshopId: {map.Id}" : "")}\r\n";
+
+                    _logger.LogInformation(maps);
 
                     return loadedMaps;
                 }
                 catch (Exception ex)
                 {
-                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(this.PreLoadAvailableMaps));
+                    _logger.LogError("Could not load available maps", ex);
                     return new List<Map>();
                 }
             }
@@ -105,12 +108,12 @@ namespace ManzaTools.Services
 
                     File.WriteAllText(filePath, defaultJson);
 
-                    Logging.Log("[PreLoadAvailableMaps] Created a new JSON file with default content.");
+                    _logger.LogInformation("Created a new JSON file with default maps.");
                     return defaultMaps;
                 }
                 catch (Exception ex)
                 {
-                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(this.PreLoadAvailableMaps));
+                    _logger.LogError("Could not save default maps", ex);
                     return new List<Map>();
                 }
             }

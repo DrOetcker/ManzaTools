@@ -75,7 +75,7 @@ namespace ManzaTools
             }
             catch (Exception ex)
             {
-                Logging.Fatal(ex, nameof(ManzaTools), nameof(OnConfigParsed));
+                Logger.LogError("Could not parse config", ex);
             }
 
             Responses.ReplyToServer("ConfigParsed ManzaTools", false, true);
@@ -159,25 +159,6 @@ namespace ManzaTools
         private void InitTestPlugin()
         {
             AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => PerformPluginTest(player, info));
-            AddCommand("css_testhandex", "Tests if the plugin is running", (player, info) => PerformHandeldEx(player, info));
-            AddCommand("css_testunhandex", "Tests if the plugin is running", (player, info) => PerformUnHandeldEx(player, info));
-        }
-
-        private void PerformUnHandeldEx(CCSPlayerController player, CommandInfo commandInfo)
-        {
-            throw new Exception("Exception without TryCatch");
-        }
-
-        private void PerformHandeldEx(CCSPlayerController player, CommandInfo commandInfo)
-        {
-            try
-            {
-                throw new Exception("Exception in TryCatch");
-            }
-            catch (Exception exception)
-            {
-                Logger.LogInformation("PerformHandeldEx", exception);
-            }
         }
 
         private void PerformPluginTest(CCSPlayerController? player, CommandInfo commandInfo)

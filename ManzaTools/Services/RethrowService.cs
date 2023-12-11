@@ -10,7 +10,7 @@ namespace ManzaTools.Services
 {
     public class RethrowService : PracticeBaseService, IRethrowService
     {
-        protected RethrowService(ILogger<RethrowService> logger, IGameModeService gameModeService)
+        public RethrowService(ILogger<RethrowService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
         }
