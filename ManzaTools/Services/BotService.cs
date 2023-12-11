@@ -4,66 +4,26 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
+
 using ManzaTools.Extensions;
+using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
 
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools.Services
 {
-    public class BotService : PracticeBaseService
+    public class BotService : PracticeBaseService, IBotService
     {
-        private IList<PlacedBots> currentPlacedBots = new List<PlacedBots>();
         private bool botSpawning = false;
 
-        public BotService(GameModeService gameModeService)
-            : base(gameModeService)
+        private CounterStrikeSharp.API.Modules.Timers.Timer? collisionGroupTimer;
+        private IList<PlacedBots> currentPlacedBots = new List<PlacedBots>();
+
+        protected BotService(ILogger<BotService> logger, IGameModeService gameModeService)
+            : base(logger, gameModeService)
         {
-        }
-
-        internal void CreateBot(CCSPlayerController? player, CommandInfo info)
-        {
-            if (!GameModeIsPractice || player == null)
-                return;
-            botSpawning = true;
-            var crouchBot = info.ArgStringAsList().Contains("crouch");
-            byte teamSide = DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
-
-            AddBot(player, crouchBot, teamSide);
-        }
-
-        internal void RemoveBots(CCSPlayerController? player, CommandInfo info)
-        {
-            if (!GameModeIsPractice || player == null)
-                return;
-
-            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
-            foreach (var playerEntity in playerEntities)
-                Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
-        }
-
-        internal void RemoveBot(CCSPlayerController? player, CommandInfo info)
-        {
-            if (!GameModeIsPractice || player == null)
-                return;
-
-            var botToKick = info.ArgByIndex(1);
-
-            var playerEntitiy = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
-            if (playerEntitiy == null)
-            {
-                player.PrintToChat($"Not bot named \"{botToKick}\" found.");
-                return;
-            }
-
-            Server.ExecuteCommand($"bot_kick {playerEntitiy.PlayerName}");
-        }
-
-        private static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
-        {
-            byte? ctNum = argList.Contains("ct") ? PlayerExtension.TeamToTeamNum("ct") : null;
-            byte? tNum = argList.Contains("t") ? PlayerExtension.TeamToTeamNum("t") : null;
-
-            return ctNum ?? tNum ?? (PlayerExtension.IsCounterTerrorist(playerTeamNum) ? (byte)2 : (byte)3);
         }
 
         private void AddBot(CCSPlayerController player, bool crouchBot, byte teamNum)
@@ -76,24 +36,38 @@ namespace ManzaTools.Services
             Utils.Timer.CreateTimer(0.1f, () => HandleNewBot(player, crouchBot), null);
         }
 
-        internal HookResult PositionBotOnRespawn(EventPlayerSpawn @event, GameEventInfo info)
+        public void CreateBot(CCSPlayerController? player, CommandInfo info)
         {
-            if (!GameModeIsPractice)
-                return HookResult.Continue;
-            var bot = @event.Userid;
-            if (bot.IsValid && bot.IsBot && bot.UserId.HasValue && !bot.IsHLTV)
-            {
-                var placedBot = currentPlacedBots.Where(x => x.Bot.Index == bot.Index).FirstOrDefault();
-                if (placedBot == null)
-                {
-                    if (!botSpawning)
-                        Utils.Timer.CreateTimer(2.5f, () => Server.ExecuteCommand($"bot_kick {bot.PlayerName}"));
-                    return HookResult.Continue;
-                }
+            if (!GameModeIsPractice || player == null)
+                return;
+            botSpawning = true;
+            var crouchBot = info.ArgStringAsList().Contains("crouch");
+            byte teamSide = DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
 
-                TeleportBot(placedBot.Position, placedBot.Angle, bot, placedBot.Crouch);
-            }
-            return HookResult.Continue;
+            AddBot(player, crouchBot, teamSide);
+        }
+
+        private static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
+        {
+            byte? ctNum = argList.Contains("ct") ? PlayerExtension.TeamToTeamNum("ct") : null;
+            byte? tNum = argList.Contains("t") ? PlayerExtension.TeamToTeamNum("t") : null;
+
+            return ctNum ?? tNum ?? (PlayerExtension.IsCounterTerrorist(playerTeamNum) ? (byte)2 : (byte)3);
+        }
+
+        private bool DoPlayersCollide(CCSPlayerPawn p1, CCSPlayerPawn p2)
+        {
+            Vector p1min, p1max, p2min, p2max;
+            var p1pos = p1.AbsOrigin;
+            var p2pos = p2.AbsOrigin;
+            p1min = p1.Collision.Mins + p1pos!;
+            p1max = p1.Collision.Maxs + p1pos!;
+            p2min = p2.Collision.Mins + p2pos!;
+            p2max = p2.Collision.Maxs + p2pos!;
+
+            return p1min.X <= p2max.X && p1max.X >= p2min.X &&
+                    p1min.Y <= p2max.Y && p1max.Y >= p2min.Y &&
+                    p1min.Z <= p2max.Z && p1max.Z >= p2min.Z;
         }
 
         private void HandleNewBot(CCSPlayerController botOwner, bool crouchBot)
@@ -124,6 +98,53 @@ namespace ManzaTools.Services
 
         }
 
+        public HookResult PositionBotOnRespawn(EventPlayerSpawn @event, GameEventInfo info)
+        {
+            if (!GameModeIsPractice)
+                return HookResult.Continue;
+            var bot = @event.Userid;
+            if (bot.IsValid && bot.IsBot && bot.UserId.HasValue && !bot.IsHLTV)
+            {
+                var placedBot = currentPlacedBots.Where(x => x.Bot.Index == bot.Index).FirstOrDefault();
+                if (placedBot == null)
+                {
+                    if (!botSpawning)
+                        Utils.Timer.CreateTimer(2.5f, () => Server.ExecuteCommand($"bot_kick {bot.PlayerName}"));
+                    return HookResult.Continue;
+                }
+
+                TeleportBot(placedBot.Position, placedBot.Angle, bot, placedBot.Crouch);
+            }
+            return HookResult.Continue;
+        }
+
+        public void RemoveBot(CCSPlayerController? player, CommandInfo info)
+        {
+            if (!GameModeIsPractice || player == null)
+                return;
+
+            var botToKick = info.ArgByIndex(1);
+
+            var playerEntitiy = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
+            if (playerEntitiy == null)
+            {
+                player.PrintToChat($"Not bot named \"{botToKick}\" found.");
+                return;
+            }
+
+            Server.ExecuteCommand($"bot_kick {playerEntitiy.PlayerName}");
+        }
+
+        public void RemoveBots(CCSPlayerController? player, CommandInfo info)
+        {
+            if (!GameModeIsPractice || player == null)
+                return;
+
+            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
+            foreach (var playerEntity in playerEntities)
+                Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
+        }
+
         private void TeleportBot(Vector targetPosition, QAngle targetViewAngle, CCSPlayerController playerEntity, bool crouchBot)
         {
             playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
@@ -134,9 +155,8 @@ namespace ManzaTools.Services
             botSpawning = false;
         }
 
-        private CounterStrikeSharp.API.Modules.Timers.Timer? collisionGroupTimer;
         //Creds: https://github.com/shobhit-pathak/MatchZy/blob/d6f7d47998d01a739e22618f7016b1d73ada870f/PracticeMode.cs#L778
-        public void TemporarilyDisableCollisions(CCSPlayerController p1, CCSPlayerController p2)
+        private void TemporarilyDisableCollisions(CCSPlayerController p1, CCSPlayerController p2)
         {
             p1.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
             p1.PlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
@@ -165,21 +185,6 @@ namespace ManzaTools.Services
                 }
 
             }, TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);
-        }
-
-        public bool DoPlayersCollide(CCSPlayerPawn p1, CCSPlayerPawn p2)
-        {
-            Vector p1min, p1max, p2min, p2max;
-            var p1pos = p1.AbsOrigin;
-            var p2pos = p2.AbsOrigin;
-            p1min = p1.Collision.Mins + p1pos!;
-            p1max = p1.Collision.Maxs + p1pos!;
-            p2min = p2.Collision.Mins + p2pos!;
-            p2max = p2.Collision.Maxs + p2pos!;
-
-            return p1min.X <= p2max.X && p1max.X >= p2min.X &&
-                    p1min.Y <= p2max.Y && p1max.Y >= p2min.Y &&
-                    p1min.Z <= p2max.Z && p1max.Z >= p2min.Z;
         }
     }
 }

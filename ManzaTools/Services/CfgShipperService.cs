@@ -1,12 +1,19 @@
 ﻿
+using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
 
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools.Services
 {
-    public class CfgShipperService
+    public class CfgShipperService : BaseService, ICfgShipperService
     {
-        
+        protected CfgShipperService(ILogger<CfgShipperService> logger)
+            : base(logger)
+        {
+        }
+
         public void InitDefaultCfgs(string modulePath)
         {
             if (!Directory.Exists(Statics.CfgPath))
@@ -39,11 +46,11 @@ namespace ManzaTools.Services
                 {
                     var cfgContent = fileReader.ReadToEnd();
                     fileReader.ReadToEnd();
-                    using(StreamWriter fileWriter = File.CreateText(cfgPath))
+                    using (StreamWriter fileWriter = File.CreateText(cfgPath))
                         fileWriter.Write(cfgContent);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logging.Fatal(ex, nameof(CfgShipperService), nameof(InitCfg));
             }

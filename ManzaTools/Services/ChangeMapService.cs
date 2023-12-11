@@ -1,33 +1,40 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Text.Json;
+
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+
+using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
-using System.Text.Json;
+
+using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
 {
-    public class ChangeMapService
+    public class ChangeMapService : BaseService, IChangeMapService
     {
-        //TODO Catch MapChangedEvent & set GameMode
-        internal void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availibleMaps)
+        protected ChangeMapService(ILogger<ChangeMapService> logger)
+            : base(logger)
         {
-            if (command == null)
-                return;
+        }
+
+        public void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availableMaps)
+        {
             if (command.ArgCount == 1)
             {
                 Responses.ReplyToPlayer(Statics.GetChatText("Available Maps:"), player);
-                Responses.ReplyToPlayer(string.Join(", ", availibleMaps.Select(x => x.Name)), player);
+                Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
                 return;
             }
             var newMapName = command.GetArg(1);
-            var newMap = availibleMaps.FirstOrDefault(map => map.Name == newMapName);
+            var newMap = availableMaps.FirstOrDefault(map => map.Name == newMapName);
             if (newMap == null)
             {
                 if (player != null)
                 {
                     Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
-                    Responses.ReplyToPlayer(string.Join(", ", availibleMaps.Select(x => x.Name)), player);
+                    Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
                 }
                 Responses.ReplyToServer($"Selected map {newMapName} not found.", false, true);
             }
@@ -40,7 +47,7 @@ namespace ManzaTools.Services
             }
         }
 
-        public IList<Map> LoadMaps()
+        public IList<Map> PreLoadAvailableMaps()
         {
             string fileName = "maps.json";
             string filePath = Path.Join(Statics.CfgPath, fileName);
@@ -63,13 +70,13 @@ namespace ManzaTools.Services
                     }
                     foreach (var map in loadedMaps)
                     {
-                        Logging.Log($"[LoadMaps] Availible Maps: {map.Name}, Id: {map.Id}");
+                        Logging.Log($"[PreLoadAvailableMaps] Available Maps: {map.Name}, Id: {map.Id}");
                     }
                     return loadedMaps;
                 }
                 catch (Exception ex)
                 {
-                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(LoadMaps));
+                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(this.PreLoadAvailableMaps));
                     return new List<Map>();
                 }
             }
@@ -78,17 +85,17 @@ namespace ManzaTools.Services
 
                 List<Map> defaultMaps = new List<Map>
                 {
-                    new Map{Name = "de_ancient"},
-                    new Map{Name = "cs_italy"},
-                    new Map{Name = "cs_office"},
-                    new Map{Name = "cs_vertigo"},
-                    new Map{Name = "de_anubis"},
-                    new Map{Name = "de_dust2"},
-                    new Map{Name = "de_inferno"},
-                    new Map{Name = "de_mirage"},
-                    new Map{Name = "de_nuke"},
-                    new Map{Name = "de_overpass"},
-                    new Map{Name = "de_vertigo"}
+                    new() {Name = "de_ancient"},
+                    new() {Name = "cs_italy"},
+                    new() {Name = "cs_office"},
+                    new() {Name = "cs_vertigo"},
+                    new() {Name = "de_anubis"},
+                    new() {Name = "de_dust2"},
+                    new() {Name = "de_inferno"},
+                    new() {Name = "de_mirage"},
+                    new() {Name = "de_nuke"},
+                    new() {Name = "de_overpass"},
+                    new() {Name = "de_vertigo"}
                 };
                 try
                 {
@@ -107,12 +114,12 @@ namespace ManzaTools.Services
                     }
                     File.WriteAllText(filePath, defaultJson);
 
-                    Logging.Log("[LoadMaps] Created a new JSON file with default content.");
+                    Logging.Log("[PreLoadAvailableMaps] Created a new JSON file with default content.");
                     return defaultMaps;
                 }
                 catch (Exception ex)
                 {
-                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(LoadMaps));
+                    Logging.Fatal(ex, nameof(ChangeMapService), nameof(this.PreLoadAvailableMaps));
                     return new List<Map>();
                 }
             }

@@ -8,6 +8,7 @@ namespace ManzaTools.Extensions
             {2, "t" },
             {3, "ct" }
         };
+
         public static bool IsCounterTerrorist(this CCSPlayerController player)
         {
             return player.TeamNum == 3;

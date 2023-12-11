@@ -2,16 +2,20 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 
+using ManzaTools.Interfaces;
+
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools.Services
 {
-    public class ClearService : PracticeBaseService
+    public class ClearService : PracticeBaseService, IClearService
     {
-        public ClearService(GameModeService gameModeService)
-            : base(gameModeService)
+        protected ClearService(ILogger<ClearService> logger, IGameModeService gameModeService)
+            : base(logger, gameModeService)
         {
         }
 
-        internal void ClearUtilities(CCSPlayerController? player, CommandInfo info)
+        public void ClearUtilities(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPractice)
                 return;

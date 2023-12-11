@@ -2,16 +2,20 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 
+using ManzaTools.Interfaces;
+
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools.Services
 {
-    public class RethrowService : PracticeBaseService
+    public class RethrowService : PracticeBaseService, IRethrowService
     {
-        public RethrowService(GameModeService gameModeService)
-            : base(gameModeService)
+        protected RethrowService(ILogger<RethrowService> logger, IGameModeService gameModeService)
+            : base(logger, gameModeService)
         {
         }
 
-        internal void Rethrow(CCSPlayerController? player, CommandInfo info)
+        public void Rethrow(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPractice)
                 return;

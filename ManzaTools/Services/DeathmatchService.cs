@@ -1,34 +1,22 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+
+using ManzaTools.Interfaces;
 using ManzaTools.Models;
+
 using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
 {
-    public class DeathmatchService
+    public class DeathmatchService : BaseService, IDeathmatchService
     {
-        private readonly GameModeService _gameModeService;
+        private readonly IGameModeService _gameModeService;
 
-        public DeathmatchService(GameModeService gameModeService)
+        protected DeathmatchService(ILogger<DeathmatchService> logger, IGameModeService gameModeService)
+        : base(logger)
         {
             _gameModeService = gameModeService;
-        }
-
-        internal void StartDeathmatch(CCSPlayerController? player, CommandInfo info)
-        {
-            _gameModeService.LoadGameMode(GameModeEnum.Deathmatch);
-            if (info?.ArgCount > 1)
-            {
-                if (info.ArgString.ToLower().Contains("nobots"))
-                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmNoBots.cfg")}");
-                if (info.ArgString.ToLower().Contains("hsonly"))
-                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmHsOnly.cfg")}");
-                if (info.ArgString.ToLower().Contains("pistol"))
-                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmPistolsOnly.cfg")}");
-                if (info.ArgString.ToLower().Contains("team"))
-                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmTeamDm.cfg")}");
-            }
         }
 
         public HookResult HandlePlayerDeath(EventPlayerDeath @event, GameEventInfo info)
@@ -44,6 +32,22 @@ namespace ManzaTools.Services
             }
 
             return HookResult.Continue;
+        }
+
+        public void StartDeathmatch(CCSPlayerController? player, CommandInfo info)
+        {
+            _gameModeService.LoadGameMode(GameModeEnum.Deathmatch);
+            if (info?.ArgCount > 1)
+            {
+                if (info.ArgString.ToLower().Contains("nobots"))
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmNoBots.cfg")}");
+                if (info.ArgString.ToLower().Contains("hsonly"))
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmHsOnly.cfg")}");
+                if (info.ArgString.ToLower().Contains("pistol"))
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmPistolsOnly.cfg")}");
+                if (info.ArgString.ToLower().Contains("team"))
+                    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", "dmTeamDm.cfg")}");
+            }
         }
     }
 }

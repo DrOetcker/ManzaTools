@@ -1,18 +1,22 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+
+using ManzaTools.Interfaces;
 using ManzaTools.Utils;
+
+using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
 {
-    public class EndRoundService : PracticeBaseService
+    public class EndRoundService : PracticeBaseService, IEndRoundService
     {
-        public EndRoundService(GameModeService gameModeService)
-            : base(gameModeService)
+        protected EndRoundService(ILogger<EndRoundService> logger, IGameModeService gameModeService)
+            : base(logger, gameModeService)
         {
         }
 
-        internal void EndRound(CCSPlayerController? player, CommandInfo info)
+        public void EndRound(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPracticeMatch)
             {

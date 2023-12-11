@@ -1,16 +1,27 @@
 ﻿using CounterStrikeSharp.API;
+
+using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
 
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools.Services
 {
-    public class GameModeService
+    public class GameModeService : BaseService, IGameModeService
     {
         private GameModeEnum currentGameMode = GameModeEnum.Practice;
+
+        protected GameModeService(ILogger<GameModeService> logger)
+            : base(logger)
+        {
+        }
+
         public GameModeEnum CurrentGameMode { get; internal set; }
 
-        public GameModeService()
+        public bool IsPractice()
         {
+            return CurrentGameMode == GameModeEnum.Practice || CurrentGameMode == GameModeEnum.PracticeMatch;
         }
 
         public void LoadGameMode(GameModeEnum newGameMode)
@@ -23,22 +34,17 @@ namespace ManzaTools.Services
                 Logging.Log($"No cfg found for GameMode {newGameMode}. Keeping GameMode {currentGameMode}");
                 return;
             }
-            if(newGameMode == GameModeEnum.PracticeMatch)
+            if (newGameMode == GameModeEnum.PracticeMatch)
             {
                 Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", Statics.GameModeCfgs[GameModeEnum.Practice])}");
             }
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
             CurrentGameMode = newGameMode;
             Responses.ReplyToServer($"Loaded GameMode {CurrentGameMode}!{GetHappyTextByMode(CurrentGameMode)}");
-            Responses.ReplyToServer($"Availible commands: {GetAvailibleCommandsByGameMode(CurrentGameMode)}");
-        }
-        
-        internal bool IsPractice()
-        {
-            return CurrentGameMode == GameModeEnum.Practice || CurrentGameMode == GameModeEnum.PracticeMatch;
+            Responses.ReplyToServer($"Available commands: {GetAvailableCommandsByGameMode(CurrentGameMode)}");
         }
 
-        private string GetAvailibleCommandsByGameMode(GameModeEnum currentGameMode)
+        private string GetAvailableCommandsByGameMode(GameModeEnum currentGameMode)
         {
             switch (currentGameMode)
             {
