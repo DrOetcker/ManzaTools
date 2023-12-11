@@ -14,7 +14,7 @@ namespace ManzaTools
         private readonly IChangeMapService _changeMapService;
         private readonly IClearService _clearService;
         private readonly IDeathmatchService _deathmatchService;
-        private readonly IEffectService effectService;
+        private readonly IEffectService _effectService;
         private readonly IEndRoundService _endRoundService;
         private readonly IGameModeService _gameModeService;
         private readonly IRconService _rconService;
@@ -64,9 +64,9 @@ namespace ManzaTools
             {
                 Config = config;
                 Config.AvailableMaps = _changeMapService.PreLoadAvailableMaps();
-                this.effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
-                this.effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
-                this.effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
+                this._effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
+                this._effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
+                this._effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
                 if (Config.DefaultGameMode != GameModeEnum.Disabled)
                     RegisterListeners();
             }
@@ -105,13 +105,13 @@ namespace ManzaTools
 
         private void InitEffectTimers()
         {
-            RegisterListener((Listeners.OnEntitySpawned)(entity => this.effectService.OnEntitySpawn(entity)));
-            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => this.effectService.OnSmokeGrenadeDetonate(@event, info));
-            RegisterEventHandler<EventPlayerBlind>((@event, info) => this.effectService.OnPlayerBlind(@event, info));
-            RegisterEventHandler<EventPlayerHurt>((@event, info) => this.effectService.OnPlayerDamage(@event, info));
-            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => this.effectService.ToggleSmokeTimer(player, info));
-            AddCommand("css_blindtimer", "Toggles the BlindTimer", (player, info) => this.effectService.ToggleBlindTimerTimer(player, info));
-            AddCommand("css_damageReport", "Toggles the DamageReport", (player, info) => this.effectService.ToggleDamageReport(player, info));
+            RegisterListener((Listeners.OnEntitySpawned)(entity => this._effectService.OnEntitySpawn(entity)));
+            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => this._effectService.OnSmokeGrenadeDetonate(@event, info));
+            RegisterEventHandler<EventPlayerBlind>((@event, info) => this._effectService.OnPlayerBlind(@event, info));
+            RegisterEventHandler<EventPlayerHurt>((@event, info) => this._effectService.OnPlayerDamage(@event, info));
+            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => this._effectService.ToggleSmokeTimer(player, info));
+            AddCommand("css_blindtimer", "Toggles the BlindTimer", (player, info) => this._effectService.ToggleBlindTimerTimer(player, info));
+            AddCommand("css_damageReport", "Toggles the DamageReport", (player, info) => this._effectService.ToggleDamageReport(player, info));
         }
 
         private void InitEndRound()

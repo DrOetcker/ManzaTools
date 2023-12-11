@@ -23,7 +23,6 @@ namespace ManzaTools
             serviceCollection.AddSingleton<IEndRoundService, EndRoundService>();
             serviceCollection.AddSingleton<ISavedNadesService, SavedNadesService>();
             serviceCollection.AddSingleton<IBotService, BotService>();
-            serviceCollection.AddSingleton<ILoggingService, LoggingService>();
         }
     }
 }
