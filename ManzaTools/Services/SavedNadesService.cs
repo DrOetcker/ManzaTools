@@ -3,6 +3,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 
 using ManzaTools.Interfaces;
@@ -16,6 +17,7 @@ namespace ManzaTools.Services
     public class SavedNadesService : PracticeBaseService, ISavedNadesService
     {
         private static readonly string savedNadesFilePath = Path.Join(Statics.CfgPath, "savedNades.json");
+        private Dictionary<ulong, SavedNade> lastLoadedNades = new Dictionary<ulong, SavedNade>();
 
         public SavedNadesService(ILogger<SavedNadesService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
@@ -35,10 +37,9 @@ namespace ManzaTools.Services
             var nadeName = info.ArgByIndex(1);
             var argIsId = uint.TryParse(nadeName, out var nadeId);
 
-            var savedNades = GetExistingNades(Server.MapName);
+            var savedNades = GetExistingNades();
             var savedNadeToDelete = argIsId ? savedNades.FirstOrDefault(x => x.Id == nadeId) : savedNades.FirstOrDefault(x => x.Name.ToLower() == nadeName.ToLower());
-
-            if (savedNadeToDelete == null)
+            if (savedNadeToDelete == null || savedNadeToDelete.Map != Server.MapName)
             {
                 Responses.ReplyToPlayer($"Could not find nade {nadeName}", player, true);
                 return;
@@ -160,12 +161,21 @@ namespace ManzaTools.Services
                     player.ExecuteClientCommand("slot10");
                     break;
             }
-            Responses.ReplyToPlayer($"Nade {savedNade.Name} (Id {savedNade.Id}) loaded.", player);
+            Responses.ReplyToPlayer($"{savedNade.Name} (Id {savedNade.Id}) loaded.", player);
             if (!string.IsNullOrEmpty(savedNade.Description))
             {
                 Responses.ReplyToPlayer(savedNade.Description, player);
                 player.PrintToCenter(savedNade.Description);
             }
+            SetLastLoadedNade(savedNade, player.SteamID);
+        }
+
+        private void SetLastLoadedNade(SavedNade savedNade, ulong steamId)
+        {
+            if (lastLoadedNades.ContainsKey(steamId))
+                lastLoadedNades.Remove(steamId);
+
+            lastLoadedNades.Add(steamId, savedNade);
         }
 
         public void SaveNade(CCSPlayerController? player, CommandInfo info)
@@ -227,7 +237,33 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice || player == null)
                 return;
 
-            Responses.ReplyToPlayer("UpdateNade - Not implemented yet", player);
+            var nadeToUpdate = lastLoadedNades.GetValueOrDefault(player.SteamID);
+            if (nadeToUpdate == null)
+            {
+                Responses.ReplyToPlayer("No Nade to update! Please load a nade before update or save a new one with !savenade", player, true);
+                return;
+            }
+
+            var savedNades = GetExistingNades();
+            var nadeToRemove = savedNades.First(x => x.Id == nadeToUpdate.Id);
+            savedNades.Remove(nadeToRemove);
+
+            try
+            {
+                var playerAngle = player.PlayerPawn.Value.EyeAngles;
+                var playerPos = player.Pawn.Value.CBodyComponent!.SceneNode!.AbsOrigin;
+                nadeToUpdate.PlayerPosition = $"{playerPos.X} {playerPos.Y} {playerPos.Z}";
+                nadeToUpdate.PlayerAngle = $"{playerAngle.X} {playerAngle.Y} {playerAngle.Z}";
+                savedNades.Add(nadeToUpdate);
+                File.WriteAllText(savedNadesFilePath, JsonSerializer.Serialize(savedNades));
+                lastLoadedNades.Remove(player.SteamID);
+                Responses.ReplyToPlayer($"Updated: Id: {nadeToUpdate.Id}, {nadeToUpdate.Type}, {nadeToUpdate.Name}, {nadeToUpdate.Description}", player);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError("Could not save nade", ex);
+            }
+
         }
 
         private static QAngle GetAngle(string playerAngle)
@@ -250,8 +286,8 @@ namespace ManzaTools.Services
 
         private static uint GetIndexForNewNade(IEnumerable<SavedNade> savedNades)
         {
-            var lastSavedNade = savedNades.LastOrDefault();
-            return lastSavedNade != null ? lastSavedNade.Id + 1 : 0;
+            var lastSavedNadeId = savedNades.Max(x => x.Id);
+            return lastSavedNadeId + 1;
         }
 
         private static string GetNadeType(string? cs2NadeName)
