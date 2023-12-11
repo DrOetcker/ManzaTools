@@ -6,6 +6,8 @@ using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
 
+using Microsoft.Extensions.Logging;
+
 namespace ManzaTools
 {
     public class ManzaTools : BasePlugin, IPluginConfig<ManzaToolsConfig>
@@ -65,9 +67,9 @@ namespace ManzaTools
             {
                 Config = config;
                 Config.AvailableMaps = _changeMapService.PreLoadAvailableMaps();
-                this._effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
-                this._effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
-                this._effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
+                _effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
+                _effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
+                _effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
                 if (Config.DefaultGameMode != GameModeEnum.Disabled)
                     RegisterListeners();
             }
@@ -106,13 +108,13 @@ namespace ManzaTools
 
         private void InitEffectTimers()
         {
-            RegisterListener((Listeners.OnEntitySpawned)(entity => this._effectService.OnEntitySpawn(entity)));
-            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => this._effectService.OnSmokeGrenadeDetonate(@event, info));
-            RegisterEventHandler<EventPlayerBlind>((@event, info) => this._effectService.OnPlayerBlind(@event, info));
-            RegisterEventHandler<EventPlayerHurt>((@event, info) => this._effectService.OnPlayerDamage(@event, info));
-            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => this._effectService.ToggleSmokeTimer(player, info));
-            AddCommand("css_blindtimer", "Toggles the BlindTimer", (player, info) => this._effectService.ToggleBlindTimerTimer(player, info));
-            AddCommand("css_damageReport", "Toggles the DamageReport", (player, info) => this._effectService.ToggleDamageReport(player, info));
+            RegisterListener((Listeners.OnEntitySpawned)(entity => _effectService.OnEntitySpawn(entity)));
+            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _effectService.OnSmokeGrenadeDetonate(@event, info));
+            RegisterEventHandler<EventPlayerBlind>((@event, info) => _effectService.OnPlayerBlind(@event, info));
+            RegisterEventHandler<EventPlayerHurt>((@event, info) => _effectService.OnPlayerDamage(@event, info));
+            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _effectService.ToggleSmokeTimer(player, info));
+            AddCommand("css_blindtimer", "Toggles the BlindTimer", (player, info) => _effectService.ToggleBlindTimerTimer(player, info));
+            AddCommand("css_damageReport", "Toggles the DamageReport", (player, info) => _effectService.ToggleDamageReport(player, info));
         }
 
         private void InitEndRound()
@@ -157,6 +159,25 @@ namespace ManzaTools
         private void InitTestPlugin()
         {
             AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => PerformPluginTest(player, info));
+            AddCommand("css_testhandex", "Tests if the plugin is running", (player, info) => PerformHandeldEx(player, info));
+            AddCommand("css_testunhandex", "Tests if the plugin is running", (player, info) => PerformUnHandeldEx(player, info));
+        }
+
+        private void PerformUnHandeldEx(CCSPlayerController player, CommandInfo commandInfo)
+        {
+            throw new Exception("Exception without TryCatch");
+        }
+
+        private void PerformHandeldEx(CCSPlayerController player, CommandInfo commandInfo)
+        {
+            try
+            {
+                throw new Exception("Exception in TryCatch");
+            }
+            catch (Exception exception)
+            {
+                Logger.LogInformation("PerformHandeldEx", exception);
+            }
         }
 
         private void PerformPluginTest(CCSPlayerController? player, CommandInfo commandInfo)
