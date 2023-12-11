@@ -140,6 +140,8 @@ namespace ManzaTools
         private void InitRethrow()
         {
             AddCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", (player, info) => _rethrowService.Rethrow(player, info));
+            AddCommand("css_last", "Positions the player on the last position where he threw a nade", (player, info) => _rethrowService.Last(player, info));
+            RegisterEventHandler<EventGrenadeThrown>((@event, info) => _rethrowService.OnGrenadeThrown(@event, info));
         }
 
         private void InitSavedNades()
