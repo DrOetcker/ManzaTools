@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Commands;
 
 using ManzaTools.Config;
 using ManzaTools.Interfaces;
@@ -155,7 +156,15 @@ namespace ManzaTools
 
         private void InitTestPlugin()
         {
-            AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => Responses.ReplyToPlayer("Läuft", player));
+            AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => PerformPluginTest(player, info));
+        }
+
+        private void PerformPluginTest(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            if (player == null)
+                Responses.ReplyToServer("ManzaTools läuft");
+            else
+                Responses.ReplyToPlayer("ManzaTools läuft", player);
         }
 
         public override void Load(bool hotReload)

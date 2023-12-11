@@ -20,7 +20,8 @@ namespace ManzaTools.Services
         {
             if (!GameModeIsPracticeMatch)
             {
-                Responses.ReplyToPlayer("Could not end round - Not in PracticeMatch", player, true);
+                if (player != null)
+                    Responses.ReplyToPlayer("Could not end round - Not in PracticeMatch", player, true);
                 return;
             }
             Server.ExecuteCommand("endround");

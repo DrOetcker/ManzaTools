@@ -19,7 +19,8 @@ namespace ManzaTools.Services
         public void Execute(CCSPlayerController? player, CommandInfo info)
         {
             Server.ExecuteCommand(info.ArgString);
-            Responses.ReplyToPlayer($"Command \"{info.ArgString}\" executed", player);
+            if (player != null)
+                Responses.ReplyToPlayer($"Command \"{info.ArgString}\" executed", player);
         }
     }
 }

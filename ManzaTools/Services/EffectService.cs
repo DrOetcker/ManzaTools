@@ -15,7 +15,7 @@ namespace ManzaTools.Services
         private bool _blindTimerEnabled;
         private bool _damageReportEnabled;
         private bool _smokeTimerEnabled;
-        private IList<ThrownGrenade> thrownGrenadeList = new List<ThrownGrenade>();
+        private readonly IList<ThrownGrenade> thrownGrenadeList = new List<ThrownGrenade>();
 
         protected EffectService(ILogger<EffectService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
@@ -28,7 +28,7 @@ namespace ManzaTools.Services
                 return;
             if (entity.DesignerName != "smokegrenade_projectile")
                 return;
-            ThrownGrenade thrownGrenade = new ThrownGrenade { Index = entity.Index, ThrownAt = DateTime.UtcNow };
+            var thrownGrenade = new ThrownGrenade { Index = entity.Index, ThrownAt = DateTime.UtcNow };
             thrownGrenadeList.Add(thrownGrenade);
         }
 
@@ -66,7 +66,7 @@ namespace ManzaTools.Services
                 //Detonate is somehow pretty early. Add 750ms to be more relalistic
                 var timeSpan = DateTime.UtcNow - foundGrenade.ThrownAt + new TimeSpan(0, 0, 0, 0, 750);
                 if (@event.Userid.IsValid)
-                    Responses.ReplyToPlayer($"Smoke landed after: {Math.Round((timeSpan.TotalMilliseconds / 1000), 1)} seconds", @event.Userid, false, false);
+                    Responses.ReplyToPlayer($"Smoke landed after: {Math.Round((timeSpan.TotalMilliseconds / 1000), 1)} seconds", @event.Userid);
                 thrownGrenadeList.Remove(foundGrenade);
             }
             return HookResult.Continue;
@@ -90,19 +90,19 @@ namespace ManzaTools.Services
         public void ToggleBlindTimerTimer(CCSPlayerController? player, CommandInfo info)
         {
             SetBlindTimerEnabled(!_blindTimerEnabled);
-            Responses.ReplyToPlayer($"BlindTimer is now {(_blindTimerEnabled ? "enabled" : "disabled")}", player);
+            Responses.ReplyToServer($"BlindTimer is now {(_blindTimerEnabled ? "enabled" : "disabled")}");
         }
 
         public void ToggleDamageReport(CCSPlayerController? player, CommandInfo info)
         {
             SetDamageReportEnabled(!_damageReportEnabled);
-            Responses.ReplyToPlayer($"DamageReport is now {(_damageReportEnabled ? "enabled" : "disabled")}", player);
+            Responses.ReplyToServer($"DamageReport is now {(_damageReportEnabled ? "enabled" : "disabled")}");
         }
 
         public void ToggleSmokeTimer(CCSPlayerController? player, CommandInfo info)
         {
             SetSmokeTimerEnabled(!_smokeTimerEnabled);
-            Responses.ReplyToPlayer($"SmokeTimer is now {(_smokeTimerEnabled ? "enabled" : "disabled")}", player);
+            Responses.ReplyToServer($"SmokeTimer is now {(_smokeTimerEnabled ? "enabled" : "disabled")}");
         }
     }
 }

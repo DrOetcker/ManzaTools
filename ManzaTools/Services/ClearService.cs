@@ -21,15 +21,15 @@ namespace ManzaTools.Services
                 return;
             var smokes = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("smokegrenade_projectile");
             foreach (var smoke in smokes)
-                smoke?.Remove();
+                smoke.Remove();
 
             var mollys = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("molotov_projectile");
             foreach (var molly in mollys)
-                molly?.Remove();
+                molly.Remove();
 
             var fires = Utilities.FindAllEntitiesByDesignerName<CSmokeGrenadeProjectile>("inferno");
             foreach (var fire in fires)
-                fire?.Remove();
+                fire.Remove();
         }
     }
 }

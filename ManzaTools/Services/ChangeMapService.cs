@@ -21,6 +21,9 @@ namespace ManzaTools.Services
 
         public void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availableMaps)
         {
+            if (player == null)
+                return;
+
             if (command.ArgCount == 1)
             {
                 Responses.ReplyToPlayer(Statics.GetChatText("Available Maps:"), player);
@@ -31,11 +34,8 @@ namespace ManzaTools.Services
             var newMap = availableMaps.FirstOrDefault(map => map.Name == newMapName);
             if (newMap == null)
             {
-                if (player != null)
-                {
-                    Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
-                    Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
-                }
+                Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
+                Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
                 Responses.ReplyToServer($"Selected map {newMapName} not found.", false, true);
             }
             else
@@ -49,29 +49,23 @@ namespace ManzaTools.Services
 
         public IList<Map> PreLoadAvailableMaps()
         {
-            string fileName = "maps.json";
-            string filePath = Path.Join(Statics.CfgPath, fileName);
+            var fileName = "maps.json";
+            var filePath = Path.Join(Statics.CfgPath, fileName);
             if (File.Exists(filePath))
             {
                 List<Map> loadedMaps = new();
                 try
                 {
-                    using (StreamReader fileReader = File.OpenText(filePath))
+                    using (var fileReader = File.OpenText(filePath))
                     {
-                        string jsonContent = fileReader.ReadToEnd();
+                        var jsonContent = fileReader.ReadToEnd();
                         if (!string.IsNullOrEmpty(jsonContent))
-                        {
-                            JsonSerializerOptions options = new()
-                            {
-                                AllowTrailingCommas = true,
-                            };
                             loadedMaps = JsonSerializer.Deserialize<List<Map>>(jsonContent) ?? new List<Map>();
-                        }
+
                     }
                     foreach (var map in loadedMaps)
-                    {
                         Logging.Log($"[PreLoadAvailableMaps] Available Maps: {map.Name}, Id: {map.Id}");
-                    }
+
                     return loadedMaps;
                 }
                 catch (Exception ex)
@@ -103,15 +97,12 @@ namespace ManzaTools.Services
                     {
                         WriteIndented = true,
                     };
-                    string defaultJson = JsonSerializer.Serialize(defaultMaps, options);
-                    string? directoryPath = Path.GetDirectoryName(filePath);
+                    var defaultJson = JsonSerializer.Serialize(defaultMaps, options);
+                    var directoryPath = Path.GetDirectoryName(filePath);
                     if (directoryPath != null)
-                    {
                         if (!Directory.Exists(directoryPath))
-                        {
                             Directory.CreateDirectory(directoryPath);
-                        }
-                    }
+
                     File.WriteAllText(filePath, defaultJson);
 
                     Logging.Log("[PreLoadAvailableMaps] Created a new JSON file with default content.");

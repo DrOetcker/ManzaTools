@@ -16,10 +16,10 @@ namespace ManzaTools.Services
 {
     public class BotService : PracticeBaseService, IBotService
     {
-        private bool botSpawning = false;
+        private bool botSpawning;
 
         private CounterStrikeSharp.API.Modules.Timers.Timer? collisionGroupTimer;
-        private IList<PlacedBots> currentPlacedBots = new List<PlacedBots>();
+        private readonly IList<PlacedBots> currentPlacedBots = new List<PlacedBots>();
 
         protected BotService(ILogger<BotService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
@@ -33,7 +33,7 @@ namespace ManzaTools.Services
             else
                 Server.ExecuteCommand("bot_add_t");
 
-            Utils.Timer.CreateTimer(0.1f, () => HandleNewBot(player, crouchBot), null);
+            Utils.Timer.CreateTimer(0.1f, () => HandleNewBot(player, crouchBot));
         }
 
         public void CreateBot(CCSPlayerController? player, CommandInfo info)
@@ -42,7 +42,7 @@ namespace ManzaTools.Services
                 return;
             botSpawning = true;
             var crouchBot = info.ArgStringAsList().Contains("crouch");
-            byte teamSide = DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
+            var teamSide = DetermineTeamSide(player.TeamNum, info.ArgStringAsList());
 
             AddBot(player, crouchBot, teamSide);
         }
@@ -55,15 +55,15 @@ namespace ManzaTools.Services
             return ctNum ?? tNum ?? (PlayerExtension.IsCounterTerrorist(playerTeamNum) ? (byte)2 : (byte)3);
         }
 
-        private bool DoPlayersCollide(CCSPlayerPawn p1, CCSPlayerPawn p2)
+        private bool DoPlayersCollide(CCSPlayerPawn botOwnerPlayerPawn, CCSPlayerPawn botPlayerPawn)
         {
             Vector p1min, p1max, p2min, p2max;
-            var p1pos = p1.AbsOrigin;
-            var p2pos = p2.AbsOrigin;
-            p1min = p1.Collision.Mins + p1pos!;
-            p1max = p1.Collision.Maxs + p1pos!;
-            p2min = p2.Collision.Mins + p2pos!;
-            p2max = p2.Collision.Maxs + p2pos!;
+            var p1pos = botOwnerPlayerPawn.AbsOrigin;
+            var p2pos = botPlayerPawn.AbsOrigin;
+            p1min = botOwnerPlayerPawn.Collision.Mins + p1pos!;
+            p1max = botOwnerPlayerPawn.Collision.Maxs + p1pos!;
+            p2min = botPlayerPawn.Collision.Mins + p2pos!;
+            p2max = botPlayerPawn.Collision.Maxs + p2pos!;
 
             return p1min.X <= p2max.X && p1max.X >= p2min.X &&
                     p1min.Y <= p2max.Y && p1max.Y >= p2min.Y &&
@@ -73,15 +73,15 @@ namespace ManzaTools.Services
         private void HandleNewBot(CCSPlayerController botOwner, bool crouchBot)
         {
             var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
-            var targetPosition = botOwner.PlayerPawn?.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
-            var targetViewAngle = botOwner.PlayerPawn?.Value?.CBodyComponent?.SceneNode?.AbsRotation;
+            var targetPosition = botOwner.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
+            var targetViewAngle = botOwner.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsRotation;
             if (targetPosition == null || targetViewAngle == null)
                 return;
 
             foreach (var playerEntity in playerEntities)
             {
-                var alredyExistingBot = currentPlacedBots.FirstOrDefault(x => x.Bot.Index == playerEntity.Index);
-                if (alredyExistingBot != null)
+                var alreadyExistingBot = currentPlacedBots.FirstOrDefault(x => x.Bot.Index == playerEntity.Index);
+                if (alreadyExistingBot != null)
                     continue;
                 TeleportBot(targetPosition, targetViewAngle, playerEntity, crouchBot);
                 currentPlacedBots.Add(new PlacedBots
@@ -105,7 +105,7 @@ namespace ManzaTools.Services
             var bot = @event.Userid;
             if (bot.IsValid && bot.IsBot && bot.UserId.HasValue && !bot.IsHLTV)
             {
-                var placedBot = currentPlacedBots.Where(x => x.Bot.Index == bot.Index).FirstOrDefault();
+                var placedBot = currentPlacedBots.FirstOrDefault(x => x.Bot.Index == bot.Index);
                 if (placedBot == null)
                 {
                     if (!botSpawning)
@@ -125,14 +125,14 @@ namespace ManzaTools.Services
 
             var botToKick = info.ArgByIndex(1);
 
-            var playerEntitiy = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
-            if (playerEntitiy == null)
+            var playerEntity = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
+            if (playerEntity == null)
             {
                 player.PrintToChat($"Not bot named \"{botToKick}\" found.");
                 return;
             }
 
-            Server.ExecuteCommand($"bot_kick {playerEntitiy.PlayerName}");
+            Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
         }
 
         public void RemoveBots(CCSPlayerController? player, CommandInfo info)
@@ -147,6 +147,8 @@ namespace ManzaTools.Services
 
         private void TeleportBot(Vector targetPosition, QAngle targetViewAngle, CCSPlayerController playerEntity, bool crouchBot)
         {
+            if (playerEntity.PlayerPawn.Value?.Bot == null)
+                return;
             playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
             playerEntity.PlayerPawn.Value.Flags |= 2;
             CCSPlayer_MovementServices movementService = new(playerEntity.PlayerPawn.Value.MovementServices!.Handle);
@@ -156,31 +158,36 @@ namespace ManzaTools.Services
         }
 
         //Creds: https://github.com/shobhit-pathak/MatchZy/blob/d6f7d47998d01a739e22618f7016b1d73ada870f/PracticeMode.cs#L778
-        private void TemporarilyDisableCollisions(CCSPlayerController p1, CCSPlayerController p2)
+        private void TemporarilyDisableCollisions(CCSPlayerController botOwner, CCSPlayerController bot)
         {
-            p1.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
-            p1.PlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
-            p2.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
-            p2.PlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
-            var p1p = p1.PlayerPawn;
-            var p2p = p2.PlayerPawn;
+            if (botOwner.PlayerPawn.Value == null || bot.PlayerPawn.Value == null)
+            {
+                this._logger.LogError("Could not perform disable Collision");
+                return;
+            }
+            botOwner.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
+            botOwner.PlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
+            bot.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
+            bot.PlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
+            var botOwnerPlayerPawn = botOwner.PlayerPawn;
+            var botPlayerPawn = bot.PlayerPawn;
             collisionGroupTimer?.Kill();
             collisionGroupTimer = Utils.Timer.CreateTimer(0.1f, () =>
             {
-                if (!p1p.IsValid || !p2p.IsValid || !p1p.Value.IsValid || !p2p.Value.IsValid)
+                if (!botOwnerPlayerPawn.IsValid || !botPlayerPawn.IsValid || !botOwnerPlayerPawn.Value.IsValid || !botPlayerPawn.Value.IsValid)
                 {
-                    Logging.Log($"player handle invalid p1p {p1p.Value.IsValid} p2p {p2p.Value.IsValid}");
+                    Logging.Log($"player handle invalid p1p {botOwnerPlayerPawn.Value.IsValid} p2p {botPlayerPawn.Value.IsValid}");
                     collisionGroupTimer?.Kill();
                     return;
                 }
 
-                if (!DoPlayersCollide(p1p.Value, p2p.Value))
+                if (!DoPlayersCollide(botOwnerPlayerPawn.Value, botPlayerPawn.Value))
                 {
                     // Once they no longer collide 
-                    p1p.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
-                    p1p.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
-                    p2p.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
-                    p2p.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
+                    botOwnerPlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
+                    botOwnerPlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
+                    botPlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
+                    botPlayerPawn.Value.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_PLAYER_MOVEMENT;
                     collisionGroupTimer?.Kill();
                 }
 

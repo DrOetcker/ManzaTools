@@ -10,14 +10,12 @@ namespace ManzaTools.Services
 {
     public class GameModeService : BaseService, IGameModeService
     {
-        private GameModeEnum currentGameMode = GameModeEnum.Practice;
-
         protected GameModeService(ILogger<GameModeService> logger)
             : base(logger)
         {
         }
 
-        public GameModeEnum CurrentGameMode { get; internal set; }
+        public GameModeEnum CurrentGameMode { get; private set; }
 
         public bool IsPractice()
         {
@@ -31,7 +29,7 @@ namespace ManzaTools.Services
             Responses.ReplyToServer($"cfg {cfgToLoad}");
             if (string.IsNullOrEmpty(cfgToLoad))
             {
-                Logging.Log($"No cfg found for GameMode {newGameMode}. Keeping GameMode {currentGameMode}");
+                Logging.Log($"No cfg found for GameMode {newGameMode}. Keeping GameMode {CurrentGameMode}");
                 return;
             }
             if (newGameMode == GameModeEnum.PracticeMatch)

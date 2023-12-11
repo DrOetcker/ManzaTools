@@ -4,6 +4,7 @@ using ManzaTools.Interfaces;
 using ManzaTools.Services;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ManzaTools
 {
