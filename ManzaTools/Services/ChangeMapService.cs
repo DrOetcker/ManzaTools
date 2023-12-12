@@ -31,7 +31,7 @@ namespace ManzaTools.Services
                 return;
             }
             var newMapName = command.GetArg(1);
-            var newMap = availableMaps.FirstOrDefault(map => map.Name == newMapName);
+            var newMap = availableMaps.FirstOrDefault(map => FindMapByName(map, newMapName));
             if (newMap == null)
             {
                 Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
@@ -45,6 +45,16 @@ namespace ManzaTools.Services
                 else
                     Server.ExecuteCommand($"changelevel {newMap.Name}");
             }
+        }
+
+        private static bool FindMapByName(Map map, string newMapName)
+        {
+            bool mapFound = map.Name == newMapName;
+            if (!mapFound)
+            {
+                return map.Name?.Substring(3) == newMapName;
+            }
+            return mapFound;
         }
 
         public IList<Map> PreLoadAvailableMaps()
