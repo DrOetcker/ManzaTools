@@ -45,11 +45,9 @@ namespace ManzaTools.Services
                     {
                         case 0:
                             nextWeapon = (CsItem)midTierEnum;
-                            Responses.ReplyToServer($"Mid : {nextWeapon}");
                             break;
                         case 1:
                             nextWeapon = (CsItem)riflesTierEnum;
-                            Responses.ReplyToServer($"Rifle : {nextWeapon}");
                             break;
                         default:
                             nextWeapon = CsItem.AK47;
@@ -57,8 +55,6 @@ namespace ManzaTools.Services
                     }
                 }
                 bot.GiveNamedItem(nextWeapon);
-                //pistols = 200-209
-                //autos = 300-410
             }
             return HookResult.Continue;
         }
