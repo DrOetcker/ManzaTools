@@ -24,9 +24,7 @@ namespace ManzaTools.Services
 
         public void LoadGameMode(GameModeEnum newGameMode)
         {
-            Responses.ReplyToServer($"New GameMode {newGameMode}");
             var cfgToLoad = Statics.GameModeCfgs[newGameMode];
-            Responses.ReplyToServer($"cfg {cfgToLoad}");
             if (string.IsNullOrEmpty(cfgToLoad))
             {
                 _logger.LogError($"No cfg found for GameMode {newGameMode}. Keeping GameMode {CurrentGameMode}");
@@ -39,7 +37,7 @@ namespace ManzaTools.Services
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
             CurrentGameMode = newGameMode;
             Responses.ReplyToServer($"Loaded GameMode {CurrentGameMode}!{GetHappyTextByMode(CurrentGameMode)}");
-            Responses.ReplyToServer($"Available commands: {GetAvailableCommandsByGameMode(CurrentGameMode)}");
+            //Responses.ReplyToServer($"Available commands: {GetAvailableCommandsByGameMode(CurrentGameMode)}");
         }
 
         private string GetAvailableCommandsByGameMode(GameModeEnum currentGameMode)

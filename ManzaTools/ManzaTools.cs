@@ -103,6 +103,7 @@ namespace ManzaTools
         private void InitDeathMatch()
         {
             AddCommand("css_deathmatch", "Changes the current GameMode to deathmatch", (player, info) => _deathmatchService.StartDeathmatch(player, info));
+            RegisterEventHandler<EventPlayerSpawn>((@event, info) => _deathmatchService.GetRandomizedWeapon(@event, info));
             RegisterEventHandler<EventPlayerDeath>((@event, info) => _deathmatchService.HandlePlayerDeath(@event, info));
         }
 

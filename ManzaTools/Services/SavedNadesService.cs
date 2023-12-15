@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Linq;
+using System.Text.Json;
 
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
@@ -183,7 +184,39 @@ namespace ManzaTools.Services
 
         private static IList<SavedNade> FilterNades(string argString, IList<SavedNade> existingNades)
         {
-            var filterSubjects = argString.ToLower().Split(' ');
+            if (argString.Contains("+"))
+                return FilterNadesAsAndFilter(existingNades, argString.ToLower().Split('+'));
+            else
+                return FilterNadesAsOrFilter(existingNades, argString.ToLower().Split(' '));
+        }
+
+        private static IList<SavedNade> FilterNadesAsAndFilter(IList<SavedNade> existingNades, string[] filterSubjects)
+        {
+            var filterByType = existingNades.Where(x =>
+            {
+                var variants = SimulateUserVariants(x.Type);
+                foreach (var variant in variants)
+                    if (filterSubjects.First() == variant)
+                        return true;
+                return false;
+            });
+            var firstArgIsType = filterByType.Count() > 0;
+            var filterByName = (firstArgIsType ? filterByType : existingNades).Where(x =>
+            {
+                foreach (var filterSubject in filterSubjects.Skip(firstArgIsType ? 1 : 0))
+                    if (!string.IsNullOrEmpty(x.Description) && !x.Description.ToLower().Contains(filterSubject)
+                    && !x.Name.ToLower().Contains(filterSubject))
+                        return false;
+
+                return true;
+            });
+
+
+            return filterByName.ToList();
+        }
+
+        private static IList<SavedNade> FilterNadesAsOrFilter(IList<SavedNade> existingNades, string[] filterSubjects)
+        {
             var filterByType = existingNades.Where(x =>
             {
                 var variants = SimulateUserVariants(x.Type);
@@ -290,7 +323,7 @@ namespace ManzaTools.Services
             var nadeToRemove = savedNades.First(x => x.Id == nadeToUpdate.Id);
             savedNades.Remove(nadeToRemove);
 
-            if(info.ArgCount == 2)
+            if (info.ArgCount == 2)
                 nadeToUpdate.Name = info.ArgByIndex(1) ?? nadeToUpdate.Name;
             else if (info.ArgCount == 3)
             {
