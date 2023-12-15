@@ -147,14 +147,21 @@ namespace ManzaTools.Services
 
         private void TeleportBot(Vector targetPosition, QAngle targetViewAngle, CCSPlayerController playerEntity, bool crouchBot)
         {
-            if (playerEntity.PlayerPawn.Value?.Bot == null)
-                return;
-            playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
-            playerEntity.PlayerPawn.Value.Flags |= 2;
-            CCSPlayer_MovementServices movementService = new(playerEntity.PlayerPawn.Value.MovementServices!.Handle);
-            Utils.Timer.CreateTimer(0.1f, () => movementService.DuckAmount = 1);
-            Utils.Timer.CreateTimer(0.2f, () => playerEntity.PlayerPawn.Value.Bot.IsCrouching = crouchBot);
-            botSpawning = false;
+            try
+            {
+                if (playerEntity.PlayerPawn.Value?.Bot == null)
+                    return;
+                playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
+                playerEntity.PlayerPawn.Value.Flags |= 2;
+                CCSPlayer_MovementServices movementService = new(playerEntity.PlayerPawn.Value.MovementServices!.Handle);
+                Utils.Timer.CreateTimer(0.1f, () => movementService.DuckAmount = 1);
+                Utils.Timer.CreateTimer(0.2f, () => playerEntity.PlayerPawn.Value.Bot.IsCrouching = crouchBot);
+                botSpawning = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Could not teleport Bot", ex);
+            }
         }
 
         //Creds: https://github.com/shobhit-pathak/MatchZy/blob/d6f7d47998d01a739e22618f7016b1d73ada870f/PracticeMode.cs#L778
@@ -162,7 +169,7 @@ namespace ManzaTools.Services
         {
             if (botOwner.PlayerPawn.Value == null || bot.PlayerPawn.Value == null)
             {
-                this._logger.LogError("Could not perform disable Collision");
+                _logger.LogError("Could not perform disable Collision");
                 return;
             }
             botOwner.PlayerPawn.Value.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;

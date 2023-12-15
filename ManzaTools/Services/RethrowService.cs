@@ -36,7 +36,7 @@ namespace ManzaTools.Services
                 @event.Weapon != "hegrenade")
                 return HookResult.Continue;
 
-            var userThronGrenade = personalThrownGrenades.FirstOrDefault(x => x.User.SteamID == @event.Userid.SteamID);
+            var userThronGrenade = personalThrownGrenades.FirstOrDefault(x => x.UserSteamId == @event.Userid.SteamID);
             if (userThronGrenade != null)
                 personalThrownGrenades.Remove(userThronGrenade);
 
@@ -48,7 +48,7 @@ namespace ManzaTools.Services
             personalThrownGrenades.Add(new PersonalThrownGrenade
             {
                 Weapon = @event.Weapon,
-                User = @event.Userid,
+                UserSteamId = @event.Userid.SteamID,
                 Position = new Vector(playerPos.X, playerPos.Y, playerPos.Z),
                 Angle = new QAngle(playerAngle.X, playerAngle.Y, playerAngle.Z),
             });
@@ -62,7 +62,7 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice || player?.PlayerPawn.Value == null)
                 return;
 
-            var userThronGrenade = personalThrownGrenades.FirstOrDefault(x => x.User.SteamID == player.SteamID);
+            var userThronGrenade = personalThrownGrenades.FirstOrDefault(x => x.UserSteamId == player.SteamID);
             if (userThronGrenade == null)
                 return;
 
