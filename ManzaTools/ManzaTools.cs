@@ -147,6 +147,7 @@ namespace ManzaTools
         private void InitSavedNades()
         {
             AddCommand("css_listnade", "Lists all saved Nades", (player, info) => _savedNadesService.ListNades(player, info));
+            AddCommand("css_listnademenu", "Lists all saved Nades as menu", (player, info) => _savedNadesService.ListNadesMenu(player, info));
             AddCommand("css_loadnade", "Loads a saved Nades", (player, info) => _savedNadesService.LoadNade(player, info));
             AddCommand("css_savenade", "Saves a saved nade", (player, info) => _savedNadesService.SaveNade(player, info));
             AddCommand("css_deletenade", "Delets a saved nade", (player, info) => _savedNadesService.DeleteNade(player, info));
@@ -163,12 +164,15 @@ namespace ManzaTools
             AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => PerformPluginTest(player, info));
         }
 
-        private void PerformPluginTest(CCSPlayerController? player, CommandInfo commandInfo)
+        private void PerformPluginTest(CCSPlayerController? player, CommandInfo info)
         {
             if (player == null)
                 Responses.ReplyToServer("ManzaTools läuft");
             else
                 Responses.ReplyToPlayer("ManzaTools läuft", player);
+            Responses.ReplyToServer($"ArgCount = {info.ArgCount}");
+            Responses.ReplyToServer($"Arg 1 = {info.ArgByIndex(1)}");
+            Responses.ReplyToServer($"Arg 2 = {info.ArgByIndex(2)}");
         }
 
         public override void Load(bool hotReload)

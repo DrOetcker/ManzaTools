@@ -8,7 +8,7 @@ public interface ISavedNadesService
     void DeleteNade(CCSPlayerController? player, CommandInfo info);
 
     void ListNades(CCSPlayerController? player, CommandInfo info);
-
+    void ListNadesMenu(CCSPlayerController? player, CommandInfo info);
     void LoadNade(CCSPlayerController? player, CommandInfo info);
 
     void SaveNade(CCSPlayerController? player, CommandInfo info);

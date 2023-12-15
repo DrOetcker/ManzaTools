@@ -3,9 +3,9 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
+using CounterStrikeSharp.API.Modules.Menu;
 using CounterStrikeSharp.API.Modules.Utils;
-
+using ManzaTools.Extensions;
 using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
@@ -73,33 +73,12 @@ namespace ManzaTools.Services
             }
 
             if (info.ArgCount > 1)
+                existingNades = FilterNades(info.ArgString, existingNades);
+
+            if (!existingNades.Any())
             {
-                var filterSubjects = info.ArgString.ToLower().Split(' ');
-                var filterByType = existingNades.Where(x =>
-                {
-                    var variants = SimulateUserVariants(x.Type);
-                    foreach (var variant in variants)
-                        if (filterSubjects.Contains(variant))
-                            return true;
-                    return false;
-                });
-                var filterByName = existingNades.Where(x =>
-                {
-                    foreach (var filterSubject in filterSubjects)
-                        if (x.Name.ToLower().Contains(filterSubject))
-                            return true;
-                    return false;
-
-                });
-                var filterByDesc = existingNades.Where(x =>
-                {
-                    foreach (var filterSubject in filterSubjects)
-                        if (!string.IsNullOrEmpty(x.Description) && x.Description.ToLower().Contains(filterSubject))
-                            return true;
-                    return false;
-                });
-
-                existingNades = filterByType.Concat(filterByName).Concat(filterByDesc).ToList();
+                Responses.ReplyToPlayer($"Could not find nades for filter: {info.ArgString}", player, true);
+                return;
             }
 
             var orderedNades = existingNades.DistinctBy(x => x.Id).OrderBy(x => x.Type).ThenBy(x => x.Id).ToList();
@@ -111,17 +90,49 @@ namespace ManzaTools.Services
             Responses.ReplyToPlayer($"Example loading: !loadnade \"God flash BSite\"", player);
         }
 
-        public void LoadNade(CCSPlayerController? player, CommandInfo info)
+        public void ListNadesMenu(CCSPlayerController? player, CommandInfo info)
         {
-            if (!GameModeIsPractice || player?.PlayerPawn.Value == null)
+            if (!GameModeIsPractice || player == null)
                 return;
 
+            var existingNades = GetExistingNades(Server.MapName);
+            if (!existingNades.Any())
+            {
+                Responses.ReplyToPlayer($"Could not find nades for {Server.MapName}", player, true);
+                return;
+            }
+            if (info.ArgCount > 1)
+                existingNades = FilterNades(info.ArgString, existingNades);
+
+            if (!existingNades.Any())
+            {
+                Responses.ReplyToPlayer($"Could not find nades for filter: {info.ArgString}", player, true);
+                return;
+            }
+
+            var nadeMenu = new ChatMenu("Nades");
+            foreach (var nade in existingNades)
+            {
+                nadeMenu.AddMenuOption(nade.Name, (player, option) => LoadNadeInternal(player, nade.Id.ToString()));
+            }
+            ChatMenus.OpenMenu(player, nadeMenu);
+        }
+
+        public void LoadNade(CCSPlayerController? player, CommandInfo info)
+        {
             if (info.ArgCount == 1)
             {
                 Responses.ReplyToPlayer("Usage: !loadnade ID | NameOhneSpace | \"Name Mit Space\"", player, true);
                 return;
             }
-            var nadeName = info.ArgByIndex(1);
+            LoadNadeInternal(player, info.ArgByIndex(1));
+        }
+
+        private void LoadNadeInternal(CCSPlayerController? player, string nadeName)
+        {
+            if (!GameModeIsPractice || player?.PlayerPawn.Value == null)
+                return;
+
             var argIsId = uint.TryParse(nadeName, out var nadeId);
 
             var savedNades = GetExistingNades(Server.MapName);
@@ -168,6 +179,37 @@ namespace ManzaTools.Services
                 player.PrintToCenter(savedNade.Description);
             }
             SetLastLoadedNade(savedNade, player.SteamID);
+        }
+
+        private static IList<SavedNade> FilterNades(string argString, IList<SavedNade> existingNades)
+        {
+            var filterSubjects = argString.ToLower().Split(' ');
+            var filterByType = existingNades.Where(x =>
+            {
+                var variants = SimulateUserVariants(x.Type);
+                foreach (var variant in variants)
+                    if (filterSubjects.Contains(variant))
+                        return true;
+                return false;
+            });
+            var filterByName = existingNades.Where(x =>
+            {
+                foreach (var filterSubject in filterSubjects)
+                    if (x.Name.ToLower().Contains(filterSubject))
+                        return true;
+                return false;
+
+            });
+            var filterByDesc = existingNades.Where(x =>
+            {
+                foreach (var filterSubject in filterSubjects)
+                    if (!string.IsNullOrEmpty(x.Description) && x.Description.ToLower().Contains(filterSubject))
+                        return true;
+                return false;
+            });
+
+            existingNades = filterByType.Concat(filterByName).Concat(filterByDesc).ToList();
+            return existingNades;
         }
 
         private void SetLastLoadedNade(SavedNade savedNade, ulong steamId)
@@ -247,6 +289,14 @@ namespace ManzaTools.Services
             var savedNades = GetExistingNades();
             var nadeToRemove = savedNades.First(x => x.Id == nadeToUpdate.Id);
             savedNades.Remove(nadeToRemove);
+
+            if(info.ArgCount == 2)
+                nadeToUpdate.Name = info.ArgByIndex(1) ?? nadeToUpdate.Name;
+            else if (info.ArgCount == 3)
+            {
+                nadeToUpdate.Name = info.ArgByIndex(1) ?? nadeToUpdate.Name;
+                nadeToUpdate.Description = info.ArgByIndex(2) ?? nadeToUpdate.Description;
+            }
 
             try
             {
