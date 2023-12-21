@@ -3,7 +3,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 
 namespace ManzaTools.Interfaces;
 
-public interface IRconService
+public interface IRconService: IBaseService
 {
     void Execute(CCSPlayerController? player, CommandInfo info);
 }

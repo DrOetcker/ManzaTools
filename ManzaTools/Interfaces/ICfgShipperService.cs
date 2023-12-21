@@ -1,6 +1,6 @@
 ﻿namespace ManzaTools.Interfaces;
 
-public interface ICfgShipperService
+public interface ICfgShipperService: IBaseService
 {
     void InitDefaultCfgs(string modulePath);
 }

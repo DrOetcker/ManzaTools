@@ -1,4 +1,5 @@
-﻿using ManzaTools.Interfaces;
+﻿using CounterStrikeSharp.API.Modules.Commands;
+using ManzaTools.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
@@ -11,5 +12,7 @@ namespace ManzaTools.Services
         {
             _logger = logger;
         }
+
+        public virtual void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand) { }
     }
 }

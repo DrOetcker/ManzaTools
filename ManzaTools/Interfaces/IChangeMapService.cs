@@ -5,7 +5,7 @@ using ManzaTools.Models;
 
 namespace ManzaTools.Interfaces;
 
-public interface IChangeMapService
+public interface IChangeMapService: IBaseService
 {
     void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availableMaps);
 

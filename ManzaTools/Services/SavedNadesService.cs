@@ -1,12 +1,10 @@
-﻿using System.Linq;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Menu;
 using CounterStrikeSharp.API.Modules.Utils;
-using ManzaTools.Extensions;
 using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;

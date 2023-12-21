@@ -1,5 +1,5 @@
 ﻿namespace ManzaTools.Interfaces
 {
-    public interface IRecordService
+    public interface IRecordService : IPracticeBaseService
     { }
 }

@@ -6,7 +6,6 @@ using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics.Eventing.Reader;
 
 namespace ManzaTools.Services
 {

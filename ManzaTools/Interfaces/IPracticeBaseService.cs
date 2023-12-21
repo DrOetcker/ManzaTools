@@ -1,6 +1,6 @@
 ﻿namespace ManzaTools.Interfaces;
 
-public interface IPracticeBaseService
+public interface IPracticeBaseService: IBaseService
 {
     bool GameModeIsPractice { get; }
 
