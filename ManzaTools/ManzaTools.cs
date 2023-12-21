@@ -24,6 +24,7 @@ namespace ManzaTools
         private readonly IRethrowService _rethrowService;
         private readonly ISavedNadesService _savedNadesService;
         private readonly ISpawnService _spawnService;
+        private readonly IRecordService _recordService;
 
         public ManzaTools(
             ICfgShipperService cfgShipper,
@@ -37,7 +38,8 @@ namespace ManzaTools
             IRethrowService rethrowService,
             IEndRoundService endRoundService,
             ISavedNadesService savedNadesService,
-            IBotService botService)
+            IBotService botService,
+            IRecordService recordService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -51,6 +53,7 @@ namespace ManzaTools
             _endRoundService = endRoundService;
             _savedNadesService = savedNadesService;
             _botService = botService;
+            _recordService = recordService;
         }
 
         public override string ModuleAuthor => "DrOetcker";
@@ -97,7 +100,7 @@ namespace ManzaTools
 
         private void InitClear()
         {
-            AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", (player, info) => _clearService.ClearUtilities(player, info));
+            this._clearService.AddCommands(AddCommand);
         }
 
         private void InitDeathMatch()

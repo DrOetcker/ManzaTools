@@ -4,7 +4,6 @@ using ManzaTools.Interfaces;
 using ManzaTools.Services;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace ManzaTools
 {
@@ -24,6 +23,7 @@ namespace ManzaTools
             serviceCollection.AddSingleton<IEndRoundService, EndRoundService>();
             serviceCollection.AddSingleton<ISavedNadesService, SavedNadesService>();
             serviceCollection.AddSingleton<IBotService, BotService>();
+            serviceCollection.AddSingleton<IRecordService, RecordService>();
         }
     }
 }
