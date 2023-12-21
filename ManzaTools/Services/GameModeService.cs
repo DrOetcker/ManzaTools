@@ -1,5 +1,5 @@
 ﻿using CounterStrikeSharp.API;
-
+using CounterStrikeSharp.API.Modules.Commands;
 using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
@@ -10,12 +10,19 @@ namespace ManzaTools.Services
 {
     public class GameModeService : BaseService, IGameModeService
     {
+        public GameModeEnum CurrentGameMode { get; private set; }
+
         public GameModeService(ILogger<GameModeService> logger)
             : base(logger)
         {
         }
 
-        public GameModeEnum CurrentGameMode { get; private set; }
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            addCommand("css_prac", "Changes the current GameMode to practice", (player, info) => LoadGameMode(GameModeEnum.Practice));
+            addCommand("css_pracmatch", "Changes the current GameMode to practice match", (player, info) => LoadGameMode(GameModeEnum.PracticeMatch));
+        }
+
 
         public bool IsPractice()
         {

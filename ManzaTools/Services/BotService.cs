@@ -26,6 +26,13 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            addCommand("css_bot", "Places a bot with given params", CreateBot);
+            addCommand("css_bot_kick", "Removes a single bots", RemoveBot);
+            addCommand("css_bots_kick", "Removes all bots", RemoveBots);
+        }
+
         private void AddBot(CCSPlayerController player, bool crouchBot, byte teamNum)
         {
             if (PlayerExtension.IsCounterTerrorist(teamNum))

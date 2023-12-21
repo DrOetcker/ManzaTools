@@ -17,6 +17,12 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            addCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", Rethrow);
+            addCommand("css_last", "Positions the player on the last position where he threw a nade", Last);
+        }
+
         public void Rethrow(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPractice)

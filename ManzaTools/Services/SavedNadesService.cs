@@ -23,6 +23,16 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            addCommand("css_listnade", "Lists all saved Nades", ListNades);
+            addCommand("css_listnademenu", "Lists all saved Nades as menu", ListNadesMenu);
+            addCommand("css_loadnade", "Loads a saved Nades", LoadNade);
+            addCommand("css_savenade", "Saves a saved nade", SaveNade);
+            addCommand("css_deletenade", "Delets a saved nade", DeleteNade);
+            addCommand("css_updatenade", "Updates a saved nade", UpdateNade);
+        }
+
         public void DeleteNade(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPractice || player == null)

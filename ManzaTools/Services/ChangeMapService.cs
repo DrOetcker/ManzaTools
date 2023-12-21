@@ -14,28 +14,35 @@ namespace ManzaTools.Services
 {
     public class ChangeMapService : BaseService, IChangeMapService
     {
+        private IList<Map> AvailableMaps { get; set; } = new List<Map>();
+
         public ChangeMapService(ILogger<ChangeMapService> logger)
             : base(logger)
         {
         }
 
-        public void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availableMaps)
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
         {
-            if (player == null)
+            addCommand("css_changeMap", "Changes the current Map", Changemap);
+        }
+
+        public void Changemap(CCSPlayerController? player, CommandInfo command)
+        {
+            if (player == null || !AvailableMaps.Any())
                 return;
 
             if (command.ArgCount == 1)
             {
                 Responses.ReplyToPlayer(Statics.GetChatText("Available Maps:"), player);
-                Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
+                Responses.ReplyToPlayer(string.Join(", ", AvailableMaps.Select(x => x.Name)), player);
                 return;
             }
             var newMapName = command.GetArg(1);
-            var newMap = availableMaps.FirstOrDefault(map => FindMapByName(map, newMapName));
+            var newMap = AvailableMaps.FirstOrDefault(map => FindMapByName(map, newMapName));
             if (newMap == null)
             {
                 Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
-                Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
+                Responses.ReplyToPlayer(string.Join(", ", AvailableMaps.Select(x => x.Name)), player);
                 Responses.ReplyToServer($"Selected map {newMapName} not found.", false, true);
             }
             else
@@ -57,7 +64,7 @@ namespace ManzaTools.Services
             return mapFound;
         }
 
-        public IList<Map> PreLoadAvailableMaps()
+        public void PreLoadAvailableMaps()
         {
             var fileName = "maps.json";
             var filePath = Path.Join(Statics.CfgPath, fileName);
@@ -79,12 +86,12 @@ namespace ManzaTools.Services
 
                     _logger.LogInformation(maps);
 
-                    return loadedMaps;
+                    AvailableMaps = loadedMaps;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError("Could not load available maps", ex);
-                    return new List<Map>();
+                    AvailableMaps = new List<Map>();
                 }
             }
             else
@@ -119,12 +126,12 @@ namespace ManzaTools.Services
                     File.WriteAllText(filePath, defaultJson);
 
                     _logger.LogInformation("Created a new JSON file with default maps.");
-                    return defaultMaps;
+                    AvailableMaps = defaultMaps;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError("Could not save default maps", ex);
-                    return new List<Map>();
+                    AvailableMaps = new List<Map>();
                 }
             }
 

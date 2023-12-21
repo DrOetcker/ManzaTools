@@ -69,7 +69,6 @@ namespace ManzaTools
             try
             {
                 Config = config;
-                Config.AvailableMaps = _changeMapService.PreLoadAvailableMaps();
                 _effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
                 _effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
                 _effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
@@ -86,15 +85,14 @@ namespace ManzaTools
 
         private void InitBots()
         {
-            AddCommand("css_bot", "Places a bot with given params", (player, info) => _botService.CreateBot(player, info));
-            AddCommand("css_bot_kick", "Removes a single bots", (player, info) => _botService.RemoveBot(player, info));
-            AddCommand("css_bots_kick", "Removes all bots", (player, info) => _botService.RemoveBots(player, info));
+            this._botService.AddCommands(AddCommand);
             RegisterEventHandler<EventPlayerSpawn>((@event, info) => _botService.PositionBotOnRespawn(@event, info));
         }
 
         private void InitChangeMap()
         {
-            AddCommand("css_changeMap", "Changes the current Map", (player, info) => _changeMapService.Changemap(player, info, Config.AvailableMaps));
+            this._changeMapService.PreLoadAvailableMaps();
+            this._changeMapService.AddCommands(AddCommand);
             RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));
         }
 
@@ -105,62 +103,49 @@ namespace ManzaTools
 
         private void InitDeathMatch()
         {
-            AddCommand("css_deathmatch", "Changes the current GameMode to deathmatch", (player, info) => _deathmatchService.StartDeathmatch(player, info));
+            this._deathmatchService.AddCommands(AddCommand);
             RegisterEventHandler<EventPlayerSpawn>((@event, info) => _deathmatchService.GetRandomizedWeapon(@event, info));
             RegisterEventHandler<EventPlayerDeath>((@event, info) => _deathmatchService.HandlePlayerDeath(@event, info));
         }
 
         private void InitEffectTimers()
         {
+            this._effectService.AddCommands(AddCommand);
             RegisterListener((Listeners.OnEntitySpawned)(entity => _effectService.OnEntitySpawn(entity)));
             RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _effectService.OnSmokeGrenadeDetonate(@event, info));
             RegisterEventHandler<EventPlayerBlind>((@event, info) => _effectService.OnPlayerBlind(@event, info));
             RegisterEventHandler<EventPlayerHurt>((@event, info) => _effectService.OnPlayerDamage(@event, info));
-            AddCommand("css_smoketimer", "Toggles the SmokeTimer", (player, info) => _effectService.ToggleSmokeTimer(player, info));
-            AddCommand("css_blindtimer", "Toggles the BlindTimer", (player, info) => _effectService.ToggleBlindTimerTimer(player, info));
-            AddCommand("css_damageReport", "Toggles the DamageReport", (player, info) => _effectService.ToggleDamageReport(player, info));
         }
 
         private void InitEndRound()
         {
-            AddCommand("css_endround", "Ends a round in a PractiveMatch", (player, info) => _endRoundService.EndRound(player, info));
+            this._endRoundService.AddCommands(AddCommand);
         }
 
-        private void InitPractice()
+        private void InitGameModes()
         {
-            AddCommand("css_prac", "Changes the current GameMode to practice", (player, info) => _gameModeService.LoadGameMode(GameModeEnum.Practice));
-        }
-
-        private void InitPracticeMatch()
-        {
-            AddCommand("css_pracmatch", "Changes the current GameMode to practice match", (player, info) => _gameModeService.LoadGameMode(GameModeEnum.PracticeMatch));
+            this._gameModeService.AddCommands(AddCommand);
         }
 
         private void InitRcon()
         {
-            AddCommand("css_rcon", "Executes a command on the server", (player, info) => _rconService.Execute(player, info));
+            this._rconService.AddCommands(AddCommand);
         }
 
         private void InitRethrow()
         {
-            AddCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", (player, info) => _rethrowService.Rethrow(player, info));
-            AddCommand("css_last", "Positions the player on the last position where he threw a nade", (player, info) => _rethrowService.Last(player, info));
+            this._rethrowService.AddCommands(AddCommand);
             RegisterEventHandler<EventGrenadeThrown>((@event, info) => _rethrowService.OnGrenadeThrown(@event, info));
         }
 
         private void InitSavedNades()
         {
-            AddCommand("css_listnade", "Lists all saved Nades", (player, info) => _savedNadesService.ListNades(player, info));
-            AddCommand("css_listnademenu", "Lists all saved Nades as menu", (player, info) => _savedNadesService.ListNadesMenu(player, info));
-            AddCommand("css_loadnade", "Loads a saved Nades", (player, info) => _savedNadesService.LoadNade(player, info));
-            AddCommand("css_savenade", "Saves a saved nade", (player, info) => _savedNadesService.SaveNade(player, info));
-            AddCommand("css_deletenade", "Delets a saved nade", (player, info) => _savedNadesService.DeleteNade(player, info));
-            AddCommand("css_updatenade", "Updates a saved nade", (player, info) => _savedNadesService.UpdateNade(player, info));
+            this._savedNadesService.AddCommands(AddCommand);
         }
 
         private void InitSpawn()
         {
-            AddCommand("css_spawn", "Sets the spawn of a player", (player, info) => _spawnService.SetPlayerPosition(player, info));
+            this._spawnService.AddCommands(AddCommand);
         }
 
         private void InitTestPlugin()
@@ -190,8 +175,7 @@ namespace ManzaTools
             InitTestPlugin();
             InitEffectTimers();
             InitChangeMap();
-            InitPractice();
-            InitPracticeMatch();
+            InitGameModes();
             InitDeathMatch();
             InitSpawn();
             InitClear();

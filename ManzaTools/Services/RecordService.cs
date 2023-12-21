@@ -1,4 +1,5 @@
-﻿using ManzaTools.Interfaces;
+﻿using CounterStrikeSharp.API.Modules.Commands;
+using ManzaTools.Interfaces;
 
 using Microsoft.Extensions.Logging;
 
@@ -9,6 +10,11 @@ namespace ManzaTools.Services
         public RecordService(ILogger<RecordService> logger, IGameModeService gameModeService)
             : base(logger, gameModeService)
         {
+        }
+
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            //TODO
         }
     }
 }

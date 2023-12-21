@@ -22,6 +22,13 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            addCommand("css_smoketimer", "Toggles the SmokeTimer", ToggleSmokeTimer);
+            addCommand("css_blindtimer", "Toggles the BlindTimer", ToggleBlindTimerTimer);
+            addCommand("css_damageReport", "Toggles the DamageReport", ToggleDamageReport);
+        }
+
         public void OnEntitySpawn(CEntityInstance entity)
         {
             if (!_smokeTimerEnabled || !GameModeIsPractice)

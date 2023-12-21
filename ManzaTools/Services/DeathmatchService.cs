@@ -20,6 +20,11 @@ namespace ManzaTools.Services
             _gameModeService = gameModeService;
         }
 
+        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        {
+            addCommand("css_deathmatch", "Changes the current GameMode to deathmatch", StartDeathmatch);
+        }
+
         public HookResult GetRandomizedWeapon(EventPlayerSpawn @event, GameEventInfo info)
         {
             if (_gameModeService.CurrentGameMode != GameModeEnum.Deathmatch)
