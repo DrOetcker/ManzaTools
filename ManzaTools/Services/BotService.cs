@@ -149,7 +149,7 @@ namespace ManzaTools.Services
         {
             try
             {
-                if (playerEntity.PlayerPawn.Value?.Bot == null)
+                if (!playerEntity.PlayerPawn.IsValid || playerEntity.PlayerPawn.Value?.Bot == null)
                     return;
                 playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
                 playerEntity.PlayerPawn.Value.Flags |= 2;
