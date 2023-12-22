@@ -23,14 +23,14 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_listnade", "Lists all saved Nades", ListNades);
-            addCommand("css_listnademenu", "Lists all saved Nades as menu", ListNadesMenu);
-            addCommand("css_loadnade", "Loads a saved Nades", LoadNade);
-            addCommand("css_savenade", "Saves a saved nade", SaveNade);
-            addCommand("css_deletenade", "Delets a saved nade", DeleteNade);
-            addCommand("css_updatenade", "Updates a saved nade", UpdateNade);
+            manzaTools.AddCommand("css_listnade", "Lists all saved Nades", ListNades);
+            manzaTools.AddCommand("css_listnademenu", "Lists all saved Nades as menu", ListNadesMenu);
+            manzaTools.AddCommand("css_loadnade", "Loads a saved Nades", LoadNade);
+            manzaTools.AddCommand("css_savenade", "Saves a saved nade", SaveNade);
+            manzaTools.AddCommand("css_deletenade", "Delets a saved nade", DeleteNade);
+            manzaTools.AddCommand("css_updatenade", "Updates a saved nade", UpdateNade);
         }
 
         public void DeleteNade(CCSPlayerController? player, CommandInfo info)

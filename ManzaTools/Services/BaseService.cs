@@ -13,6 +13,6 @@ namespace ManzaTools.Services
             _logger = logger;
         }
 
-        public virtual void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand) { }
+        public virtual void Init(ManzaTools manzaTools) { }
     }
 }

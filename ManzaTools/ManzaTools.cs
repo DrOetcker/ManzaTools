@@ -72,8 +72,12 @@ namespace ManzaTools
                 _effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
                 _effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
                 _effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
+                _changeMapService.PreLoadAvailableMaps();
                 if (Config.DefaultGameMode != GameModeEnum.Disabled)
-                    RegisterListeners();
+                {
+                    InitServices();
+                    InitTestPlugin();
+                }
             }
             catch (Exception ex)
             {
@@ -83,74 +87,36 @@ namespace ManzaTools
             Responses.ReplyToServer("ConfigParsed ManzaTools", false, true);
         }
 
-        private void InitBots()
+        public override void Load(bool hotReload)
         {
-            this._botService.AddCommands(AddCommand);
-            RegisterEventHandler<EventPlayerSpawn>((@event, info) => _botService.PositionBotOnRespawn(@event, info));
+            _cfgShipper.InitDefaultCfgs(ModuleDirectory);
+            Responses.ReplyToServer("Loaded ManzaTools", false, true);
         }
 
-        private void InitChangeMap()
+        public override void Unload(bool hotReload)
         {
-            this._changeMapService.PreLoadAvailableMaps();
-            this._changeMapService.AddCommands(AddCommand);
-            RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));
+            Responses.ReplyToServer("Unloaded ManzaTools", false, true);
         }
 
-        private void InitClear()
+        private void InitServices()
         {
-            this._clearService.AddCommands(AddCommand);
-        }
-
-        private void InitDeathMatch()
-        {
-            this._deathmatchService.AddCommands(AddCommand);
-            RegisterEventHandler<EventPlayerSpawn>((@event, info) => _deathmatchService.GetRandomizedWeapon(@event, info));
-            RegisterEventHandler<EventPlayerDeath>((@event, info) => _deathmatchService.HandlePlayerDeath(@event, info));
-        }
-
-        private void InitEffectTimers()
-        {
-            this._effectService.AddCommands(AddCommand);
-            RegisterListener((Listeners.OnEntitySpawned)(entity => _effectService.OnEntitySpawn(entity)));
-            RegisterEventHandler<EventSmokegrenadeDetonate>((@event, info) => _effectService.OnSmokeGrenadeDetonate(@event, info));
-            RegisterEventHandler<EventPlayerBlind>((@event, info) => _effectService.OnPlayerBlind(@event, info));
-            RegisterEventHandler<EventPlayerHurt>((@event, info) => _effectService.OnPlayerDamage(@event, info));
-        }
-
-        private void InitEndRound()
-        {
-            this._endRoundService.AddCommands(AddCommand);
-        }
-
-        private void InitGameModes()
-        {
-            this._gameModeService.AddCommands(AddCommand);
-        }
-
-        private void InitRcon()
-        {
-            this._rconService.AddCommands(AddCommand);
-        }
-
-        private void InitRethrow()
-        {
-            this._rethrowService.AddCommands(AddCommand);
-            RegisterEventHandler<EventGrenadeThrown>((@event, info) => _rethrowService.OnGrenadeThrown(@event, info));
-        }
-
-        private void InitSavedNades()
-        {
-            this._savedNadesService.AddCommands(AddCommand);
-        }
-
-        private void InitSpawn()
-        {
-            this._spawnService.AddCommands(AddCommand);
+            _botService.Init(this);
+            _changeMapService.Init(this);
+            _clearService.Init(this);
+            _deathmatchService.Init(this);
+            _effectService.Init(this);
+            _endRoundService.Init(this);
+            _gameModeService.Init(this);
+            _rconService.Init(this);
+            _rethrowService.Init(this);
+            _savedNadesService.Init(this);
+            _spawnService.Init(this);
+            _recordService.Init(this);
         }
 
         private void InitTestPlugin()
         {
-            AddCommand("css_testplugin", "Tests if the plugin is running", (player, info) => PerformPluginTest(player, info));
+            AddCommand("css_testplugin", "Tests if the plugin is running", PerformPluginTest);
         }
 
         private void PerformPluginTest(CCSPlayerController? player, CommandInfo info)
@@ -162,33 +128,6 @@ namespace ManzaTools
             Responses.ReplyToServer($"ArgCount = {info.ArgCount}");
             Responses.ReplyToServer($"Arg 1 = {info.ArgByIndex(1)}");
             Responses.ReplyToServer($"Arg 2 = {info.ArgByIndex(2)}");
-        }
-
-        public override void Load(bool hotReload)
-        {
-            _cfgShipper.InitDefaultCfgs(ModuleDirectory);
-            Responses.ReplyToServer("Loaded ManzaTools", false, true);
-        }
-
-        private void RegisterListeners()
-        {
-            InitTestPlugin();
-            InitEffectTimers();
-            InitChangeMap();
-            InitGameModes();
-            InitDeathMatch();
-            InitSpawn();
-            InitClear();
-            InitRcon();
-            InitRethrow();
-            InitEndRound();
-            InitSavedNades();
-            InitBots();
-        }
-
-        public override void Unload(bool hotReload)
-        {
-            Responses.ReplyToServer("Unloaded ManzaTools", false, true);
         }
     }
 }

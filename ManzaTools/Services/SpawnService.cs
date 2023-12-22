@@ -18,9 +18,9 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_spawn", "Sets the spawn of a player", SetPlayerPosition);
+            manzaTools.AddCommand("css_spawn", "Sets the spawn of a player", SetPlayerPosition);
         }
 
         public void SetPlayerPosition(CCSPlayerController? player, CommandInfo info)

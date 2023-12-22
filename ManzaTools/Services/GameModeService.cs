@@ -17,10 +17,10 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_prac", "Changes the current GameMode to practice", (player, info) => LoadGameMode(GameModeEnum.Practice));
-            addCommand("css_pracmatch", "Changes the current GameMode to practice match", (player, info) => LoadGameMode(GameModeEnum.PracticeMatch));
+            manzaTools.AddCommand("css_prac", "Changes the current GameMode to practice", (player, info) => LoadGameMode(GameModeEnum.Practice));
+            manzaTools.AddCommand("css_pracmatch", "Changes the current GameMode to practice match", (player, info) => LoadGameMode(GameModeEnum.PracticeMatch));
         }
 
 

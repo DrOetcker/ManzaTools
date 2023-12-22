@@ -16,9 +16,9 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_endround", "Ends a round in a PractiveMatch", EndRound);
+            manzaTools.AddCommand("css_endround", "Ends a round in a PractiveMatch", EndRound);
         }
 
         public void EndRound(CCSPlayerController? player, CommandInfo info)

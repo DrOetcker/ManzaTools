@@ -14,16 +14,20 @@ namespace ManzaTools.Services
 {
     public class ChangeMapService : BaseService, IChangeMapService
     {
+        private readonly IGameModeService _gameModeService;
+
         private IList<Map> AvailableMaps { get; set; } = new List<Map>();
 
-        public ChangeMapService(ILogger<ChangeMapService> logger)
+        public ChangeMapService(ILogger<ChangeMapService> logger, IGameModeService gameModeService)
             : base(logger)
         {
+            this._gameModeService = gameModeService;
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_changeMap", "Changes the current Map", Changemap);
+            manzaTools.AddCommand("css_changeMap", "Changes the current Map", Changemap);
+            manzaTools.RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));
         }
 
         public void Changemap(CCSPlayerController? player, CommandInfo command)

@@ -26,11 +26,12 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_bot", "Places a bot with given params", CreateBot);
-            addCommand("css_bot_kick", "Removes a single bots", RemoveBot);
-            addCommand("css_bots_kick", "Removes all bots", RemoveBots);
+            manzaTools.RegisterEventHandler<EventPlayerSpawn>(PositionBotOnRespawn);
+            manzaTools.AddCommand("css_bot", "Places a bot with given params", CreateBot);
+            manzaTools.AddCommand("css_bot_kick", "Removes a single bots", RemoveBot);
+            manzaTools.AddCommand("css_bots_kick", "Removes all bots", RemoveBots);
         }
 
         private void AddBot(CCSPlayerController player, bool crouchBot, byte teamNum)

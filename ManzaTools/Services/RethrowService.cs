@@ -17,10 +17,11 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", Rethrow);
-            addCommand("css_last", "Positions the player on the last position where he threw a nade", Last);
+            manzaTools.AddCommand("css_rethrow", "Rethrows the last thrown grenade on the Server", Rethrow);
+            manzaTools.AddCommand("css_last", "Positions the player on the last position where he threw a nade", Last);
+            manzaTools.RegisterEventHandler<EventGrenadeThrown>(OnGrenadeThrown);
         }
 
         public void Rethrow(CCSPlayerController? player, CommandInfo info)
@@ -42,9 +43,9 @@ namespace ManzaTools.Services
                 @event.Weapon != "hegrenade")
                 return HookResult.Continue;
 
-            var userThronGrenade = personalThrownGrenades.FirstOrDefault(x => x.UserSteamId == @event.Userid.SteamID);
-            if (userThronGrenade != null)
-                personalThrownGrenades.Remove(userThronGrenade);
+            var userThrownGrenade = personalThrownGrenades.FirstOrDefault(x => x.UserSteamId == @event.Userid.SteamID);
+            if (userThrownGrenade != null)
+                personalThrownGrenades.Remove(userThrownGrenade);
 
             if (@event.Userid.PlayerPawn?.Value?.EyeAngles == null || @event.Userid.Pawn.Value?.CBodyComponent?.SceneNode?.AbsOrigin == null)
                 return HookResult.Continue;

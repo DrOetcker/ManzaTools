@@ -15,9 +15,9 @@ namespace ManzaTools.Services
         {
         }
 
-        public override void AddCommands(Action<string, string, CommandInfo.CommandCallback> addCommand)
+        public override void Init(ManzaTools manzaTools)
         {
-            addCommand("css_clear", "Clears all Smoke, flying molotovs and fires", this.ClearUtilities);
+            manzaTools.AddCommand("css_clear", "Clears all Smoke, flying molotovs and fires", this.ClearUtilities);
         }
 
         public void ClearUtilities(CCSPlayerController? player, CommandInfo info)
