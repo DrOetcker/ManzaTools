@@ -76,6 +76,7 @@ namespace ManzaTools
                 {
                     InitServices();
                     InitTestPlugin();
+                    InitDebugOutput();
                 }
             }
             catch (Exception ex)
@@ -116,6 +117,17 @@ namespace ManzaTools
         private void InitTestPlugin()
         {
             AddCommand("css_testplugin", "Tests if the plugin is running", PerformPluginTest);
+        }
+
+        private void InitDebugOutput()
+        {
+            AddCommand("css_debug", "Tests if the plugin is running", ToggleDebug);
+        }
+
+        private void ToggleDebug(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            Responses.debugOutputsActive = !Responses.debugOutputsActive;
+            Responses.ReplyToServer($"Debug outputs active: {Responses.debugOutputsActive}");
         }
 
         private void PerformPluginTest(CCSPlayerController? player, CommandInfo info)

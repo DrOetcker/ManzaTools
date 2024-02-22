@@ -24,9 +24,9 @@ namespace ManzaTools.Services
 
         public override void Init(ManzaTools manzaTools)
         {
-            manzatools.addcommand("css_recordstart", "starts a recording", startrecording);
-            manzatools.addcommand("css_recordstop", "starts a recording", stoprecording);
-            manzatools.registereventhandler<eventgrenadethrown>(ongrenadethrown);
+            manzaTools.AddCommand("css_recordstart", "starts a recording", StartRecording);
+            manzaTools.AddCommand("css_recordstop", "starts a recording", StopRecording);
+            manzaTools.RegisterEventHandler<EventGrenadeThrown>(OnGrenadeThrown);
         }
 
         public HookResult OnGrenadeThrown(EventGrenadeThrown @event, GameEventInfo info)

@@ -1,5 +1,4 @@
-﻿using CounterStrikeSharp.API.Modules.Commands;
-using ManzaTools.Interfaces;
+﻿using ManzaTools.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
