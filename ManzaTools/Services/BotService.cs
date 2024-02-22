@@ -28,7 +28,7 @@ namespace ManzaTools.Services
 
         public override void Init(ManzaTools manzaTools)
         {
-            manzaTools.RegisterEventHandler<EventPlayerSpawn>(PositionBotOnRespawn);
+            manzaTools.RegisterEventHandler<EventPlayerSpawn>((@event, info) => PositionBotOnRespawn(@event, info));
             manzaTools.AddCommand("css_bot", "Places a bot with given params", CreateBot);
             manzaTools.AddCommand("css_bot_kick", "Removes a single bots", RemoveBot);
             manzaTools.AddCommand("css_bots_kick", "Removes all bots", RemoveBots);
@@ -80,7 +80,7 @@ namespace ManzaTools.Services
 
         private void HandleNewBot(CCSPlayerController botOwner, bool crouchBot)
         {
-            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
+            var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
             var targetPosition = botOwner.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
             var targetViewAngle = botOwner.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsRotation;
             if (targetPosition == null || targetViewAngle == null)
@@ -133,7 +133,7 @@ namespace ManzaTools.Services
 
             var botToKick = info.ArgByIndex(1);
 
-            var playerEntity = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
+            var playerEntity = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
             if (playerEntity == null)
             {
                 player.PrintToChat($"Not bot named \"{botToKick}\" found.");
@@ -148,7 +148,7 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice || player == null)
                 return;
 
-            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
+            var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
             foreach (var playerEntity in playerEntities)
                 Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
         }

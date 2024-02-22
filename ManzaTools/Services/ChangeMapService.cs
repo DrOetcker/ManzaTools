@@ -26,7 +26,7 @@ namespace ManzaTools.Services
 
         public override void Init(ManzaTools manzaTools)
         {
-            manzaTools.AddCommand("css_changeMap", "Changes the current Map", Changemap);
+            manzaTools.AddCommand("css_changemap", "Changes the current Map", Changemap);
             manzaTools.RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));
         }
 

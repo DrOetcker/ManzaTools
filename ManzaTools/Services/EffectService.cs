@@ -48,7 +48,6 @@ namespace ManzaTools.Services
             if (!_blindTimerEnabled || !GameModeIsPractice || @event.BlindDuration < 1.2)
                 return HookResult.Continue;
 
-
             // From about 2secs a player is really blind. Substract one second to make it more relaistic
             if (@event.BlindDuration > 2.1)
                 Responses.ReplyToPlayer($"{@event.Userid.PlayerName} blinded for {Math.Round(@event.BlindDuration - 1, 1)} seconds. {ChatColors.Green}Nice Flash!", @event.Attacker);

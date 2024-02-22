@@ -1,6 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
-
 using ManzaTools.Config;
 using ManzaTools.Interfaces;
 using ManzaTools.Models;
@@ -111,7 +110,7 @@ namespace ManzaTools
             _rethrowService.Init(this);
             _savedNadesService.Init(this);
             _spawnService.Init(this);
-            _recordService.Init(this);
+            //_recordService.Init(this);
         }
 
         private void InitTestPlugin()
@@ -126,8 +125,6 @@ namespace ManzaTools
             else
                 Responses.ReplyToPlayer("ManzaTools läuft", player);
             Responses.ReplyToServer($"ArgCount = {info.ArgCount}");
-            Responses.ReplyToServer($"Arg 1 = {info.ArgByIndex(1)}");
-            Responses.ReplyToServer($"Arg 2 = {info.ArgByIndex(2)}");
         }
     }
 }

@@ -9,6 +9,8 @@ namespace ManzaTools.Services
     {
         private readonly IGameModeService _gameModeService;
 
+        protected bool debugOutputs = false;
+
         public PracticeBaseService(ILogger<PracticeBaseService> loggerService, IGameModeService gameModeService)
         : base(loggerService)
         {

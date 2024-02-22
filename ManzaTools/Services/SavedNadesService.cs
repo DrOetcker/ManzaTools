@@ -93,7 +93,7 @@ namespace ManzaTools.Services
             var orderedNades = existingNades.DistinctBy(x => x.Id).OrderBy(x => x.Type).ThenBy(x => x.Id).ToList();
             foreach (var nade in orderedNades)
             {
-                Responses.ReplyToPlayer($"Id: {nade.Id}, {nade.Type}, {nade.Name}", player);
+                Responses.ReplyToPlayer($"{nade.Type}, Id: {nade.Id}, {nade.Name}", player);
             }
             Responses.ReplyToPlayer($"Example loading: !loadnade 1", player);
             Responses.ReplyToPlayer($"Example loading: !loadnade \"God flash BSite\"", player);

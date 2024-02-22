@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
+using CounterStrikeSharp.API.Modules.Events;
 using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
@@ -23,9 +24,9 @@ namespace ManzaTools.Services
 
         public override void Init(ManzaTools manzaTools)
         {
-            manzaTools.AddCommand("css_recordstart", "Starts a recording", StartRecording);
-            manzaTools.AddCommand("css_recordstop", "Starts a recording", StopRecording);
-            manzaTools.RegisterEventHandler<EventGrenadeThrown>(OnGrenadeThrown);
+            manzatools.addcommand("css_recordstart", "starts a recording", startrecording);
+            manzatools.addcommand("css_recordstop", "starts a recording", stoprecording);
+            manzatools.registereventhandler<eventgrenadethrown>(ongrenadethrown);
         }
 
         public HookResult OnGrenadeThrown(EventGrenadeThrown @event, GameEventInfo info)
@@ -72,14 +73,20 @@ namespace ManzaTools.Services
 
             try
             {
-                var reproduceEvent = currentRecording.NadeEvents.First();
-                var nadeHandle = player.GiveNamedItem($"weapon_hegrenade");
-                //var nadeHandle = player.GiveNamedItem($"{reproduceEvent.Weapon}");
-                Responses.ReplyToPlayer($"NewNade {nadeHandle} for {reproduceEvent.Weapon}", player);
-                var newEvent = new EventGrenadeThrown(nadeHandle);
-                newEvent.Weapon = reproduceEvent.Weapon;
-                newEvent.Userid = reproduceEvent.Userid;
-                newEvent.FireEvent(false);
+                //var reproduceEvent = currentRecording.NadeEvents.First();
+                //var nadeHandle = player.GiveNamedItem($"weapon_hegrenade");
+                ////var nadeHandle = player.GiveNamedItem($"{reproduceEvent.Weapon}");
+                //Responses.ReplyToPlayer($"NewNade {nadeHandle} for {reproduceEvent.Weapon}", player);
+                //var newEvent = new EventGrenadeThrown(nadeHandle);
+                //newEvent.Weapon = reproduceEvent.Weapon;
+                //newEvent.Userid = reproduceEvent.Userid;
+                //newEvent.FireEvent(false);
+
+                var playerHurt= new EventPlayerHurt(true);
+                playerHurt.Health = 10;
+                playerHurt.Userid = player;
+                playerHurt.FireEventToClient(player);
+
             }
             catch (Exception ex)
             {

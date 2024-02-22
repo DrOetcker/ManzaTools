@@ -31,7 +31,7 @@ namespace ManzaTools.Services
             var ctSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
             var tSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
 
-            if (!int.TryParse(info.ArgByIndex(1), out var spawnId) && spawnId >= 1)
+            if (!int.TryParse(info.ArgByIndex(1), out var spawnId))
             {
                 Responses.ReplyToPlayer("Usage: !spawn 1-5 t/ct -> !spawn 2 ct", player, true);
                 return;
