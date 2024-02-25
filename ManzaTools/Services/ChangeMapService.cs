@@ -51,6 +51,8 @@ namespace ManzaTools.Services
             }
             else
             {
+                Server.ExecuteCommand("css_bots_kick");
+
                 if (newMap.Id > 0)
                     Server.ExecuteCommand($"host_workshop_map {newMap.Id}");
                 else

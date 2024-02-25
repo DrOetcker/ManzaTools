@@ -23,11 +23,11 @@ namespace ManzaTools.Utils
                 Server.PrintToChatAll(Statics.GetChatText(message, isError));
         }
 
-        public static void SendDebug(string message, string? module, string? function)
+        public static void SendDebug(string message, string? module = null, string? function = null)
         {
             if (!debugOutputsActive)
                 return;
-            if(!string.IsNullOrEmpty(module) && !string.IsNullOrEmpty(function))
+            if (!string.IsNullOrEmpty(module) && !string.IsNullOrEmpty(function))
             {
                 Server.PrintToChatAll(Statics.GetDebugChatText($"{module}.{function}: {message}"));
                 return;

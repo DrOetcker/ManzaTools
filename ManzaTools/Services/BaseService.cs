@@ -1,4 +1,5 @@
-﻿using ManzaTools.Interfaces;
+﻿using CounterStrikeSharp.API.Core;
+using ManzaTools.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace ManzaTools.Services
@@ -13,5 +14,10 @@ namespace ManzaTools.Services
         }
 
         public virtual void Init(ManzaTools manzaTools) { }
+
+        public bool IsPlayerValid(CCSPlayerController? player)
+        {
+            return (player != null && player.IsValid && player.PlayerPawn.IsValid && player.PlayerPawn.Value != null);
+        }
     }
 }
