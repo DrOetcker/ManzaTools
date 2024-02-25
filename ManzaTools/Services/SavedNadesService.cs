@@ -317,7 +317,7 @@ namespace ManzaTools.Services
 
         public void UpdateNade(CCSPlayerController? player, CommandInfo info)
         {
-            if (!GameModeIsPractice || player == null)
+            if (!GameModeIsPractice || player?.PlayerPawn.Value == null || player.Pawn.Value == null)
                 return;
 
             var nadeToUpdate = lastLoadedNades.GetValueOrDefault(player.SteamID);
@@ -338,6 +338,12 @@ namespace ManzaTools.Services
                 nadeToUpdate.Name = info.ArgByIndex(1) ?? nadeToUpdate.Name;
                 nadeToUpdate.Description = info.ArgByIndex(2) ?? nadeToUpdate.Description;
             }
+            var newNadeType = GetNadeType(player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName);
+            if (string.IsNullOrEmpty(newNadeType))
+            {
+                Responses.ReplyToPlayer($"{player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName} not supported", player, true);
+                return;
+            }
 
             try
             {
@@ -345,6 +351,7 @@ namespace ManzaTools.Services
                 var playerPos = player.Pawn.Value.CBodyComponent!.SceneNode!.AbsOrigin;
                 nadeToUpdate.PlayerPosition = $"{playerPos.X} {playerPos.Y} {playerPos.Z}";
                 nadeToUpdate.PlayerAngle = $"{playerAngle.X} {playerAngle.Y} {playerAngle.Z}";
+                nadeToUpdate.Type = newNadeType;
                 savedNades.Add(nadeToUpdate);
                 File.WriteAllText(savedNadesFilePath, JsonSerializer.Serialize(savedNades));
                 lastLoadedNades.Remove(player.SteamID);
