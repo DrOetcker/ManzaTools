@@ -9,14 +9,15 @@ using ManzaTools.Models;
 using ManzaTools.Utils;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace ManzaTools.Services
 {
     public class RecordService : PracticeBaseService, IRecordService
     {
+        private static readonly string savedReplaysFilePath = Path.Join(Statics.CfgPath, "savedReplays.json");
         private bool recording = false;
-        private IList<Recording> currentRecordings = new List<Recording>();
+        private Replay currentReplay;
         private Stopwatch stopWatch = new Stopwatch();
 
         public RecordService(ILogger<RecordService> logger, IGameModeService gameModeService)
@@ -28,7 +29,8 @@ namespace ManzaTools.Services
         {
             manzaTools.AddCommand("css_rec", "starts a recording", StartRecording);
             manzaTools.AddCommand("css_recstop", "starts a recording", StopRecording);
-            manzaTools.AddCommand("css_replay", "starts a recording", Replay);
+            manzaTools.AddCommand("css_testreplay", "starts a recording", TestRecorededReplay);
+            manzaTools.AddCommand("css_savereplay", "starts a recording", SaveRecordedReplay);
             manzaTools.RegisterEventHandler<EventGrenadeThrown>(OnGrenadeThrown);
         }
 
@@ -37,8 +39,7 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice || !recording || !@event.Userid.IsValid)
                 return HookResult.Continue;
 
-            var currentRecording = currentRecordings.FirstOrDefault(x => x.SteamId == @event.Userid.SteamID && !x.Finished);
-            if (currentRecording == null)
+            if (currentReplay == null)
             {
                 Responses.ReplyToServer("No running recording found");
                 return HookResult.Continue;
@@ -77,12 +78,12 @@ namespace ManzaTools.Services
             }
             if (grenadeProjectile != null)
             {
-                currentRecordings.Last().RecordedNades.Add(new RecordedNade
+                currentReplay.RecordedNades.Add(new RecordedNade
                 {
                     Type = @event.Weapon,
-                    Position = new Vector(grenadeProjectile.AbsOrigin!.X, grenadeProjectile.AbsOrigin!.Y, grenadeProjectile.AbsOrigin!.Z),
-                    Angle = new QAngle(grenadeProjectile.AbsRotation!.X, grenadeProjectile.AbsRotation!.Y, grenadeProjectile.AbsRotation!.Z),
-                    Velocity = new Vector(grenadeProjectile.AbsVelocity!.X, grenadeProjectile.AbsVelocity!.Y, grenadeProjectile.AbsVelocity!.Z),
+                    Position = $"{grenadeProjectile.AbsOrigin!.X} {grenadeProjectile.AbsOrigin!.Y} {grenadeProjectile.AbsOrigin!.Z}",
+                    Angle = $"{grenadeProjectile.AbsRotation!.X} {grenadeProjectile.AbsRotation!.Y} {grenadeProjectile.AbsRotation!.Z}",
+                    Velocity = $"{grenadeProjectile.AbsVelocity!.X} {grenadeProjectile.AbsVelocity!.Y} {grenadeProjectile.AbsVelocity!.Z}",
                     ThrownAt = stopWatch.Elapsed
                 });
             }
@@ -98,44 +99,81 @@ namespace ManzaTools.Services
             recording = true;
             stopWatch.Restart();
 
-            currentRecordings.Add(new Recording(player.SteamID, currentRecordings.Count + 1, DateTime.UtcNow));
+            currentReplay = new Replay(player.SteamID, DateTime.UtcNow);
         }
 
         private void StopRecording(CCSPlayerController? player, CommandInfo commandInfo)
         {
             if (!GameModeIsPractice || !recording || player == null)
                 return;
-            Responses.ReplyToPlayer("Stop Recording", player);
             recording = false;
 
-            var currentRecording = currentRecordings.FirstOrDefault(x => x.SteamId == player.SteamID && !x.Finished);
-            if (currentRecording == null)
+            if (currentReplay == null)
                 return;
-            currentRecording.Finished = true;
+            currentReplay.Finished = true;
             stopWatch.Stop();
-            currentRecording.Duration = stopWatch.Elapsed;
-            Responses.ReplyToPlayer("Recording saved", player);
+            currentReplay.Duration = stopWatch.Elapsed;
+            Responses.ReplyToPlayer("Recording finished. Test with !testreplay", player);
         }
 
-        private void Replay(CCSPlayerController? player, CommandInfo commandInfo)
+        private void TestRecorededReplay(CCSPlayerController? player, CommandInfo commandInfo)
         {
+            if (!GameModeIsPractice || recording || player == null || currentReplay == null)
+                return;
+            PlayReplay(currentReplay);
+        }
+
+        private void SaveRecordedReplay(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            if (!GameModeIsPractice || recording || player == null || currentReplay == null)
+                return;
+
+            if (commandInfo.ArgCount == 1)
+            {
+                Responses.ReplyToPlayer("Usage: !savereplay \"My replayname\"", player, true);
+                return;
+            }
+            var replayName = commandInfo.ArgByIndex(1);
+            var description = commandInfo.ArgByIndex(2);
+            var playerName = player.PlayerName;
+            var playerSteamId = player.SteamID.ToString();
+            var mapName = Server.MapName;
+
+            VerifySavedReplaysFileExists();
+
+            var savedReplays = GetExistingReplays();
 
             try
             {
-                PlayReplay(currentRecordings.Last());
+                currentReplay.Id = GetIndexForNewReplay(savedReplays);
+                currentReplay.Map = mapName;
+                currentReplay.Creator = playerName;
+                currentReplay.CreatorSteamId = playerSteamId;
+                currentReplay.Name = replayName;
+                currentReplay.Description = description;
+                savedReplays.Add(currentReplay);
 
+                File.WriteAllText(savedReplaysFilePath, JsonSerializer.Serialize(savedReplays));
+                Responses.ReplyToPlayer($"Replay saved: Id: {currentReplay.Id}, {currentReplay.Name}, {currentReplay.Description}", player);
+                currentReplay = null;
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
-                Responses.ReplyToPlayer("fück", player);
-                _logger.LogError("Error on create & Fire Event", ex);
+                _logger.LogError("Could not save nade", ex);
             }
         }
 
-        private async Task PlayReplay(Recording recordToReplay)
+        private static uint GetIndexForNewReplay(IEnumerable<Replay> savedReplays)
+        {
+            if (!savedReplays.Any())
+                return 1;
+            var lastSavedReplayId = savedReplays.Max(x => x.Id);
+            return lastSavedReplayId + 1;
+        }
+
+        private void PlayReplay(Replay recordToReplay)
         {
             Responses.ReplyToServer($"Count Nades: {recordToReplay.RecordedNades.Count}");
-            var elapsedTimeInCurrentReplay = new TimeSpan();
             foreach (var item in recordToReplay.RecordedNades)
             {
                 new CounterStrikeSharp.API.Modules.Timers.Timer((float)(item.ThrownAt.TotalMilliseconds / 1000), () => ThrownGrenade(item), TimerFlags.STOP_ON_MAPCHANGE);
@@ -149,11 +187,14 @@ namespace ManzaTools.Services
             {
                 case "smokegrenade":
                     Responses.ReplyToServer($"replay: {item.Type}");
+                    var position = GetVector(item.Position);
+                    var angle = GetAngle(item.Angle);
+                    var velocity = GetAngle(item.Velocity);
                     var thrownSmoke = CSmokeGrenadeProjectile_CreateFunc.Invoke(
-                                    item.Position.Handle,
-                                    item.Angle.Handle,
-                                    item.Velocity.Handle,
-                                    item.Velocity.Handle,
+                                    position.Handle,
+                                    angle.Handle,
+                                    velocity.Handle,
+                                    velocity.Handle,
                                     IntPtr.Zero,
                                     45,
                                     1
@@ -202,19 +243,22 @@ namespace ManzaTools.Services
 
             if (grenadeProjectile != null && grenadeProjectile.DesignerName != "smokegrenade_projectile")
             {
-                grenadeProjectile.Teleport(item.Position, item.Angle, item.Velocity);
+                var position = GetVector(item.Position);
+                var angle = GetAngle(item.Angle);
+                var velocity = GetVector(item.Velocity);
+                grenadeProjectile.Teleport(position, angle, velocity);
 
-                grenadeProjectile.InitialPosition.X = item.Position!.X;
-                grenadeProjectile.InitialPosition.Y = item.Position!.Y;
-                grenadeProjectile.InitialPosition.Z = item.Position!.Z;
+                grenadeProjectile.InitialPosition.X = position.X;
+                grenadeProjectile.InitialPosition.Y = position.Y;
+                grenadeProjectile.InitialPosition.Z = position.Z;
 
-                grenadeProjectile.InitialVelocity.X = item.Velocity!.X;
-                grenadeProjectile.InitialVelocity.Y = item.Velocity!.Y;
-                grenadeProjectile.InitialVelocity.Z = item.Velocity!.Z;
+                grenadeProjectile.InitialVelocity.X = velocity.X;
+                grenadeProjectile.InitialVelocity.Y = velocity.Y;
+                grenadeProjectile.InitialVelocity.Z = velocity.Z;
 
-                grenadeProjectile.AngVelocity.X = item.Velocity!.X;
-                grenadeProjectile.AngVelocity.Y = item.Velocity!.Y;
-                grenadeProjectile.AngVelocity.Z = item.Velocity!.Z;
+                grenadeProjectile.AngVelocity.X = velocity.X;
+                grenadeProjectile.AngVelocity.Y = velocity.Y;
+                grenadeProjectile.AngVelocity.Z = velocity.Z;
 
                 grenadeProjectile.TeamNum = 1;
             }
@@ -224,5 +268,38 @@ namespace ManzaTools.Services
                 Environment.OSVersion.Platform == PlatformID.Unix
                     ? @"\x55\x4C\x89\xC1\x48\x89\xE5\x41\x57\x41\x56\x49\x89\xD6"
                     : @"\x48\x89\x5C\x24\x2A\x48\x89\x6C\x24\x2A\x48\x89\x74\x24\x2A\x57\x41\x56\x41\x57\x48\x83\xEC\x50\x4C\x8B\xB4\x24");
+
+        #region LoadSaveFileManagement
+
+        private static IList<Replay> GetExistingReplays(string? mapName = null)
+        {
+            if (!File.Exists(savedReplaysFilePath))
+                return new List<Replay>();
+
+            var existingRecordingsJson = File.ReadAllText(savedReplaysFilePath);
+            var savedRecordings = JsonSerializer.Deserialize<IList<Replay>>(existingRecordingsJson) ?? new List<Replay>();
+            return string.IsNullOrEmpty(mapName) ?
+                       savedRecordings :
+                       savedRecordings.Where(x => x.Map == mapName).ToList();
+        }
+
+        private static void VerifySavedReplaysFileExists()
+        {
+            if (!File.Exists(savedReplaysFilePath))
+                File.WriteAllText(savedReplaysFilePath, "[]");
+        }
+
+        private static Vector GetVector(string playerPosition)
+        {
+            var coordinates = playerPosition.Split(' ');
+            return new Vector(float.Parse(coordinates[0]), float.Parse(coordinates[1]), float.Parse(coordinates[2]));
+        }
+
+        private static QAngle GetAngle(string playerAngle)
+        {
+            var coordinates = playerAngle.Split(' ');
+            return new QAngle(float.Parse(coordinates[0]), float.Parse(coordinates[1]), float.Parse(coordinates[2]));
+        }
+        #endregion
     }
 }

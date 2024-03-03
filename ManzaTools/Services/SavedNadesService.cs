@@ -370,18 +370,6 @@ namespace ManzaTools.Services
             return new QAngle(float.Parse(coordinates[0]), float.Parse(coordinates[1]), float.Parse(coordinates[2]));
         }
 
-        private static IList<SavedNade> GetExistingNades(string? mapName = null)
-        {
-            if (!File.Exists(savedNadesFilePath))
-                return new List<SavedNade>();
-
-            var existingNadesJson = File.ReadAllText(savedNadesFilePath);
-            var savedNades = JsonSerializer.Deserialize<IList<SavedNade>>(existingNadesJson) ?? new List<SavedNade>();
-            return string.IsNullOrEmpty(mapName) ?
-                       savedNades :
-                       savedNades.Where(x => x.Map == mapName).ToList();
-        }
-
         private static uint GetIndexForNewNade(IEnumerable<SavedNade> savedNades)
         {
             var lastSavedNadeId = savedNades.Max(x => x.Id);
@@ -426,6 +414,18 @@ namespace ManzaTools.Services
                     return new List<string> { "molotov", "molly", "brand", "feuer" };
                 default: return new List<string>();
             }
+        }
+
+        private static IList<SavedNade> GetExistingNades(string? mapName = null)
+        {
+            if (!File.Exists(savedNadesFilePath))
+                return new List<SavedNade>();
+
+            var existingNadesJson = File.ReadAllText(savedNadesFilePath);
+            var savedNades = JsonSerializer.Deserialize<IList<SavedNade>>(existingNadesJson) ?? new List<SavedNade>();
+            return string.IsNullOrEmpty(mapName) ?
+                       savedNades :
+                       savedNades.Where(x => x.Map == mapName).ToList();
         }
 
         private static void VerifySavedNadesFileExists()
