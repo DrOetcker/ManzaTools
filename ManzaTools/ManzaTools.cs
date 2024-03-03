@@ -111,7 +111,7 @@ namespace ManzaTools
             _rethrowService.Init(this);
             _savedNadesService.Init(this);
             _spawnService.Init(this);
-            //_recordService.Init(this);
+            _recordService.Init(this);
         }
 
         private void InitTestPlugin()

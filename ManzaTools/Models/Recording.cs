@@ -1,6 +1,4 @@
-﻿using CounterStrikeSharp.API.Core;
-
-namespace ManzaTools.Models
+﻿namespace ManzaTools.Models
 {
     internal class Recording
     {
@@ -8,17 +6,15 @@ namespace ManzaTools.Models
         {
             SteamId = steamID;
             RecordingIndex = recordingIndex;
-            StartTime = startTime;
-            NadeEvents = new List<EventGrenadeThrown>();
+            RecordingTime = startTime;
+            RecordedNades = new List<RecordedNade>();
         }
 
         public ulong SteamId { get; }
         public int RecordingIndex { get; }
-        public DateTime StartTime { get; }
-        public DateTime EndTime { get; set; }
+        public DateTime RecordingTime { get; }
         public bool Finished { get; set; }
-        public virtual TimeSpan Duration => EndTime == null || StartTime == null ? new TimeSpan() : EndTime - StartTime;
-
-        public IList<EventGrenadeThrown> NadeEvents { get; }
+        public IList<RecordedNade> RecordedNades { get; }
+        public TimeSpan Duration { get; internal set; }
     }
 }

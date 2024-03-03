@@ -73,7 +73,7 @@ namespace ManzaTools.Services
             var activeWeapon = @event.Attacker.PlayerPawn.Value.WeaponServices.ActiveWeapon;
             if (activeWeapon.Value != null)
             {
-                activeWeapon.Value.Clip1 = 250;
+                //activeWeapon.Value.Clip1 = 250;
                 activeWeapon.Value.ReserveAmmo[0] = 250;
             }
 

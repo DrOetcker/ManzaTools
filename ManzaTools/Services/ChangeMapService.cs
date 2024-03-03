@@ -62,7 +62,7 @@ namespace ManzaTools.Services
 
         private static bool FindMapByName(Map map, string newMapName)
         {
-            bool mapFound = map.Name == newMapName;
+            bool mapFound = map.Name.ToLower() == newMapName.ToLower();
             if (!mapFound)
             {
                 return map.Name?.Substring(3) == newMapName;
