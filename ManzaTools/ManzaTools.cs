@@ -3,6 +3,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 using ManzaTools.Config;
 using ManzaTools.Interfaces;
 using ManzaTools.Models;
+using ManzaTools.Services;
 using ManzaTools.Utils;
 
 using Microsoft.Extensions.Logging;
@@ -78,6 +79,11 @@ namespace ManzaTools
                     InitTestPlugin();
                     InitDebugOutput();
                 }
+                RegisterListener((Listeners.OnMapStart)(entity =>
+                {
+                    SavedNadesService.VerifySavedNadesFileExists();
+                    RecordService.VerifySavedReplaysFileExists();
+                }));
             }
             catch (Exception ex)
             {

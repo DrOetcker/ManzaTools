@@ -15,7 +15,7 @@ namespace ManzaTools.Services
 {
     public class SavedNadesService : PracticeBaseService, ISavedNadesService
     {
-        private static readonly string savedNadesFilePath = Path.Join(Statics.CfgPath, "savedNades.json");
+        private static readonly string jsonFilename = "savedNades.json";
         private Dictionary<ulong, SavedNade> lastLoadedNades = new Dictionary<ulong, SavedNade>();
 
         public SavedNadesService(ILogger<SavedNadesService> logger, IGameModeService gameModeService)
@@ -55,7 +55,7 @@ namespace ManzaTools.Services
             }
 
             savedNades.Remove(savedNadeToDelete);
-            File.WriteAllText(savedNadesFilePath, JsonSerializer.Serialize(savedNades));
+            File.WriteAllText(GetJsonPath(Server.MapName), JsonSerializer.Serialize(savedNades));
 
             Responses.ReplyToServer($"Nade {savedNadeToDelete.Name} (Id {savedNadeToDelete.Id}) deleted.", true);
             Responses.ReplyToServer("Details for one last time:");
@@ -124,7 +124,7 @@ namespace ManzaTools.Services
             {
                 nadeMenu.AddMenuOption(nade.Name, (player, option) => LoadNadeInternal(player, nade.Id.ToString()));
             }
-            ChatMenus.OpenMenu(player, nadeMenu);
+            MenuManager.OpenChatMenu(player, nadeMenu);
         }
 
         public void LoadNade(CCSPlayerController? player, CommandInfo info)
@@ -153,8 +153,8 @@ namespace ManzaTools.Services
                 return;
             }
 
-            var nadeToLoadPlayerPos = GetVector(savedNade.PlayerPosition);
-            var nadeToLoadPlayerAngle = GetAngle(savedNade.PlayerAngle);
+            var nadeToLoadPlayerPos = TeleportHelper.GetVectorFromJsonString(savedNade.PlayerPosition);
+            var nadeToLoadPlayerAngle = TeleportHelper.GetAngleFromJsonString(savedNade.PlayerAngle);
             if (savedNade.IsImported)
             {
                 nadeToLoadPlayerPos.Z -= 59;
@@ -183,10 +183,8 @@ namespace ManzaTools.Services
             }
             Responses.ReplyToPlayer($"{savedNade.Name} (Id {savedNade.Id}) loaded.", player);
             if (!string.IsNullOrEmpty(savedNade.Description))
-            {
                 Responses.ReplyToPlayer(savedNade.Description, player);
-                player.PrintToCenter(savedNade.Description);
-            }
+
             SetLastLoadedNade(savedNade, player.SteamID);
         }
 
@@ -280,14 +278,13 @@ namespace ManzaTools.Services
             var playerAngle = player.PlayerPawn.Value.EyeAngles;
             var playerPos = player.Pawn.Value.CBodyComponent!.SceneNode!.AbsOrigin;
             var mapName = Server.MapName;
-            var nadeType = GetNadeType(player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName);
+            var nadeType = NadeHelper.GetNadeType(player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName);
             if (string.IsNullOrEmpty(nadeType))
             {
                 Responses.ReplyToPlayer($"{player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName} not supported", player, true);
                 return;
             }
 
-            VerifySavedNadesFileExists();
             var savedNades = GetExistingNades();
 
             try
@@ -306,7 +303,7 @@ namespace ManzaTools.Services
                     Team = team
                 };
                 savedNades.Add(nadeToSave);
-                File.WriteAllText(savedNadesFilePath, JsonSerializer.Serialize(savedNades));
+                File.WriteAllText(GetJsonPath(Server.MapName), JsonSerializer.Serialize(savedNades));
                 Responses.ReplyToPlayer($"Saved: Id: {nadeToSave.Id}, {nadeToSave.Type}, {nadeToSave.Name}, {nadeToSave.Description}", player);
             }
             catch (JsonException ex)
@@ -338,7 +335,7 @@ namespace ManzaTools.Services
                 nadeToUpdate.Name = info.ArgByIndex(1) ?? nadeToUpdate.Name;
                 nadeToUpdate.Description = info.ArgByIndex(2) ?? nadeToUpdate.Description;
             }
-            var newNadeType = GetNadeType(player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName);
+            var newNadeType = NadeHelper.GetNadeType(player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName);
             if (string.IsNullOrEmpty(newNadeType))
             {
                 Responses.ReplyToPlayer($"{player.PlayerPawn.Value.WeaponServices?.ActiveWeapon.Value?.DesignerName} not supported", player, true);
@@ -353,7 +350,7 @@ namespace ManzaTools.Services
                 nadeToUpdate.PlayerAngle = $"{playerAngle.X} {playerAngle.Y} {playerAngle.Z}";
                 nadeToUpdate.Type = newNadeType;
                 savedNades.Add(nadeToUpdate);
-                File.WriteAllText(savedNadesFilePath, JsonSerializer.Serialize(savedNades));
+                File.WriteAllText(GetJsonPath(Server.MapName), JsonSerializer.Serialize(savedNades));
                 lastLoadedNades.Remove(player.SteamID);
                 Responses.ReplyToPlayer($"Updated: Id: {nadeToUpdate.Id}, {nadeToUpdate.Type}, {nadeToUpdate.Name}, {nadeToUpdate.Description}", player);
             }
@@ -364,40 +361,10 @@ namespace ManzaTools.Services
 
         }
 
-        private static QAngle GetAngle(string playerAngle)
-        {
-            var coordinates = playerAngle.Split(' ');
-            return new QAngle(float.Parse(coordinates[0]), float.Parse(coordinates[1]), float.Parse(coordinates[2]));
-        }
-
         private static uint GetIndexForNewNade(IEnumerable<SavedNade> savedNades)
         {
             var lastSavedNadeId = savedNades.Max(x => x.Id);
             return lastSavedNadeId + 1;
-        }
-
-        private static string GetNadeType(string? cs2NadeName)
-        {
-            switch (cs2NadeName)
-            {
-                case Consts.FlashCs2:
-                    return Consts.Flash;
-                case Consts.SmokeCs2:
-                    return Consts.Smoke;
-                case Consts.NadeCs2:
-                    return Consts.Nade;
-                case Consts.MolotovCs2:
-                case Consts.IncCs2:
-                    return Consts.Molotov;
-                default:
-                    return "";
-            }
-        }
-
-        private static Vector GetVector(string playerPosition)
-        {
-            var coordinates = playerPosition.Split(' ');
-            return new Vector(float.Parse(coordinates[0]), float.Parse(coordinates[1]), float.Parse(coordinates[2]));
         }
 
         private static IEnumerable<string> SimulateUserVariants(string? type)
@@ -418,20 +385,29 @@ namespace ManzaTools.Services
 
         private static IList<SavedNade> GetExistingNades(string? mapName = null)
         {
-            if (!File.Exists(savedNadesFilePath))
+            if (!File.Exists(GetJsonPath(Server.MapName)))
                 return new List<SavedNade>();
 
-            var existingNadesJson = File.ReadAllText(savedNadesFilePath);
+            var existingNadesJson = File.ReadAllText(GetJsonPath(Server.MapName));
             var savedNades = JsonSerializer.Deserialize<IList<SavedNade>>(existingNadesJson) ?? new List<SavedNade>();
             return string.IsNullOrEmpty(mapName) ?
                        savedNades :
                        savedNades.Where(x => x.Map == mapName).ToList();
         }
 
-        private static void VerifySavedNadesFileExists()
+        private static string GetJsonPath(string map)
         {
-            if (!File.Exists(savedNadesFilePath))
-                File.WriteAllText(savedNadesFilePath, "[]");
+            return Path.Join(Statics.CfgPath, map, $"{map}_{jsonFilename}");
+        }
+
+        public static void VerifySavedNadesFileExists()
+        {
+            var directoryPath = Path.GetDirectoryName(GetJsonPath(Server.MapName));
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
+
+            if (!File.Exists(GetJsonPath(Server.MapName)))
+                File.WriteAllText(GetJsonPath(Server.MapName), "[]");
         }
     }
 }
