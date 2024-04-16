@@ -352,9 +352,9 @@ namespace ManzaTools.Services
 
         private void PlayReplay(SavedReplay recordToReplay, CCSPlayerController? player)
         {
-            Responses.ReplyToPlayer($"Replay {recordToReplay.Name} loaded. ", player);
-            Responses.ReplyToPlayer($"Duration: {recordToReplay.Duration.ToString(@"mm\m\ ss\s")}", player);
-            Responses.ReplyToPlayer($"{recordToReplay.RecordedNades.Count} nades will being thrown", player);
+            Responses.ReplyToServer($"Replay {recordToReplay.Name} loaded. ");
+            Responses.ReplyToServer($"Duration: {recordToReplay.Duration.ToString(@"mm\m\ ss\s")}");
+            Responses.ReplyToServer($"{recordToReplay.RecordedNades.Count} nades will being thrown");
             foreach (var item in recordToReplay.RecordedNades)
             {
                 new CounterStrikeSharp.API.Modules.Timers.Timer((float)(item.ThrownAt.TotalMilliseconds / 1000), () => ThrownGrenade(item, player, recordToReplay.Id), TimerFlags.STOP_ON_MAPCHANGE);
@@ -364,7 +364,7 @@ namespace ManzaTools.Services
         private void ThrownGrenade(RecordedNade item, CCSPlayerController player, uint replayId)
         {
             CBaseCSGrenadeProjectile? grenadeProjectile = null;
-            Responses.ReplyToPlayer($"Throwing: {item.Type} (Id {replayId}.{item.Id}) thrown at {item.ThrownAt.ToString(@"mm\m\ ss\.f\s")}", player);
+            Responses.ReplyToServer($"{item.Type} thrown at {item.ThrownAt.ToString(@"mm\m\ ss\.f\s")}. Load with !utilload {replayId}.{item.Id}");
             switch (item.Type)
             {
                 case Consts.Smoke:
@@ -439,7 +439,7 @@ namespace ManzaTools.Services
             }
         }
 
-        private static MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int, CSmokeGrenadeProjectile> CSmokeGrenadeProjectile_CreateFunc = new(
+        public static MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int, CSmokeGrenadeProjectile> CSmokeGrenadeProjectile_CreateFunc = new(
                 Environment.OSVersion.Platform == PlatformID.Unix
                     ? @"\x55\x4C\x89\xC1\x48\x89\xE5\x41\x57\x41\x56\x49\x89\xD6"
                     : @"\x48\x89\x5C\x24\x2A\x48\x89\x6C\x24\x2A\x48\x89\x74\x24\x2A\x57\x41\x56\x41\x57\x48\x83\xEC\x50\x4C\x8B\xB4\x24");

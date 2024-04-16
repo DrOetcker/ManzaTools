@@ -17,7 +17,8 @@ namespace ManzaTools.Utils
         {
             {GameModeEnum.Practice, "practice.cfg" },
             {GameModeEnum.PracticeMatch, "practiceMatch.cfg" },
-            {GameModeEnum.Deathmatch, "deathMatch.cfg" }
+            {GameModeEnum.Deathmatch, "deathMatch.cfg" },
+            {GameModeEnum.Match, "match.cfg" }
         };
 
         public static string GetChatText(string textToWrite, bool isError = false)

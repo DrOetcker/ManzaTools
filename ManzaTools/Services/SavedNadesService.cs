@@ -363,7 +363,7 @@ namespace ManzaTools.Services
 
         private static uint GetIndexForNewNade(IEnumerable<SavedNade> savedNades)
         {
-            var lastSavedNadeId = savedNades.Max(x => x.Id);
+            var lastSavedNadeId = savedNades.Any() ? savedNades.Max(x => x.Id) : 0;
             return lastSavedNadeId + 1;
         }
 

@@ -26,6 +26,9 @@
 		<None Update="initCfgs\dmTeamDm.cfg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="initCfgs\match.cfg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="initCfgs\practiceMatch.cfg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
