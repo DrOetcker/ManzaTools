@@ -6,8 +6,6 @@ namespace ManzaTools.Config
 {
     public class ManzaToolsConfig : BasePluginConfig
     {
-        public virtual IList<Map> AvailableMaps { get; set; } = new List<Map>();
-
         public bool BlindTimerEnabled { get; set; } = true;
 
         public bool DamageReportEnabled { get; set; } = true;

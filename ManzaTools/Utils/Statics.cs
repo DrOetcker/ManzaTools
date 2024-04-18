@@ -11,12 +11,14 @@ namespace ManzaTools.Utils
         public static readonly string ConsolePrefix = "[ManzaTools]";
         public static readonly string ConsolePrefixError = "[ManzaTools - Error]";
         private static readonly string ChatPrefix = $"[{ChatColors.Green}ManzaTools{ChatColors.Default}]";
+        private static readonly string DebugPrefix = $"[{ChatColors.Yellow}ManzaTools Debug{ChatColors.Default}]";
         private static readonly string ChatErrorPrefix = $"[{ChatColors.Red}ManzaTools{ChatColors.Default}]";
         public static readonly Dictionary<GameModeEnum, string> GameModeCfgs = new()
         {
             {GameModeEnum.Practice, "practice.cfg" },
             {GameModeEnum.PracticeMatch, "practiceMatch.cfg" },
-            {GameModeEnum.Deathmatch, "deathMatch.cfg" }
+            {GameModeEnum.Deathmatch, "deathMatch.cfg" },
+            {GameModeEnum.Match, "match.cfg" }
         };
 
         public static string GetChatText(string textToWrite, bool isError = false)
@@ -24,6 +26,11 @@ namespace ManzaTools.Utils
             if (isError)
                 return $"{ChatErrorPrefix} {textToWrite}";
             return $"{ChatPrefix} {textToWrite}";
+        }
+
+        public static string GetDebugChatText(string textToWrite)
+        {
+            return $"{DebugPrefix} {textToWrite}";
         }
     }
 }

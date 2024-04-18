@@ -2,7 +2,7 @@
 
 namespace ManzaTools.Interfaces;
 
-public interface IGameModeService
+public interface IGameModeService: IBaseService
 {
     GameModeEnum CurrentGameMode { get; }
 

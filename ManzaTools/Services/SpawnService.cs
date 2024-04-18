@@ -18,6 +18,11 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void Init(ManzaTools manzaTools)
+        {
+            manzaTools.AddCommand("css_spawn", "Sets the spawn of a player", SetPlayerPosition);
+        }
+
         public void SetPlayerPosition(CCSPlayerController? player, CommandInfo info)
         {
             if (!GameModeIsPractice || player == null)
@@ -26,7 +31,7 @@ namespace ManzaTools.Services
             var ctSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
             var tSpawns = Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist").Where(x => x.IsValid && x.Enabled && x.Priority == 0).ToList();
 
-            if (!int.TryParse(info.ArgByIndex(1), out var spawnId) && spawnId >= 1)
+            if (!int.TryParse(info.ArgByIndex(1), out var spawnId))
             {
                 Responses.ReplyToPlayer("Usage: !spawn 1-5 t/ct -> !spawn 2 ct", player, true);
                 return;

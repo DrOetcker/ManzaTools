@@ -16,6 +16,11 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void Init(ManzaTools manzaTools)
+        {
+            manzaTools.AddCommand("css_rcon", "Executes a command on the server", Execute);
+        }
+
         public void Execute(CCSPlayerController? player, CommandInfo info)
         {
             Server.ExecuteCommand(info.ArgString);

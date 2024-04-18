@@ -22,6 +22,17 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void Init(ManzaTools manzaTools)
+        {
+            manzaTools.AddCommand("css_smoketimer", "Toggles the SmokeTimer", ToggleSmokeTimer);
+            manzaTools.AddCommand("css_blindtimer", "Toggles the BlindTimer", ToggleBlindTimerTimer);
+            manzaTools.AddCommand("css_damageReport", "Toggles the DamageReport", ToggleDamageReport);
+            manzaTools.RegisterListener((Listeners.OnEntitySpawned)OnEntitySpawn);
+            manzaTools.RegisterEventHandler<EventSmokegrenadeDetonate>(OnSmokeGrenadeDetonate);
+            manzaTools.RegisterEventHandler<EventPlayerBlind>(OnPlayerBlind);
+            manzaTools.RegisterEventHandler<EventPlayerHurt>(OnPlayerDamage);
+        }
+
         public void OnEntitySpawn(CEntityInstance entity)
         {
             if (!_smokeTimerEnabled || !GameModeIsPractice)
@@ -36,7 +47,6 @@ namespace ManzaTools.Services
         {
             if (!_blindTimerEnabled || !GameModeIsPractice || @event.BlindDuration < 1.2)
                 return HookResult.Continue;
-
 
             // From about 2secs a player is really blind. Substract one second to make it more relaistic
             if (@event.BlindDuration > 2.1)

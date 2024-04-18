@@ -7,7 +7,9 @@ namespace ManzaTools.Models
     {
         public ulong UserSteamId { get; internal set; }
         public string Weapon { get; internal set; }
-        public QAngle Angle { get; set; } = null!;
-        public Vector Position { get; set; } = null!;
+        public QAngle PlayerAngle { get; set; } = null!;
+        public Vector PlayerPosition { get; set; } = null!;
+        public string Position { get; internal set; }
+        public string Velocity { get; internal set; }
     }
 }

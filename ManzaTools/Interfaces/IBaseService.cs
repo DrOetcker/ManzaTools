@@ -1,4 +1,10 @@
-﻿namespace ManzaTools.Interfaces;
+﻿using CounterStrikeSharp.API.Modules.Commands;
 
-public interface IBaseService
-{ }
+namespace ManzaTools.Interfaces
+{
+
+    public interface IBaseService
+    {
+        public void Init(ManzaTools manzaTools);
+    }
+}

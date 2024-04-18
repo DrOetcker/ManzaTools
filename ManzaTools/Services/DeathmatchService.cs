@@ -6,7 +6,6 @@ using ManzaTools.Interfaces;
 using ManzaTools.Models;
 using ManzaTools.Utils;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics.Eventing.Reader;
 
 namespace ManzaTools.Services
 {
@@ -19,6 +18,13 @@ namespace ManzaTools.Services
         : base(logger)
         {
             _gameModeService = gameModeService;
+        }
+
+        public override void Init(ManzaTools manzaTools)
+        {
+            manzaTools.AddCommand("css_deathmatch", "Changes the current GameMode to deathmatch", StartDeathmatch);
+            manzaTools.RegisterEventHandler<EventPlayerSpawn>(GetRandomizedWeapon);
+            manzaTools.RegisterEventHandler<EventPlayerDeath>(HandlePlayerDeath);
         }
 
         public HookResult GetRandomizedWeapon(EventPlayerSpawn @event, GameEventInfo info)
@@ -67,7 +73,7 @@ namespace ManzaTools.Services
             var activeWeapon = @event.Attacker.PlayerPawn.Value.WeaponServices.ActiveWeapon;
             if (activeWeapon.Value != null)
             {
-                activeWeapon.Value.Clip1 = 250;
+                //activeWeapon.Value.Clip1 = 250;
                 activeWeapon.Value.ReserveAmmo[0] = 250;
             }
 

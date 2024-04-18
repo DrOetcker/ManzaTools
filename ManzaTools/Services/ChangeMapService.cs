@@ -14,32 +14,45 @@ namespace ManzaTools.Services
 {
     public class ChangeMapService : BaseService, IChangeMapService
     {
-        public ChangeMapService(ILogger<ChangeMapService> logger)
+        private readonly IGameModeService _gameModeService;
+
+        private IList<Map> AvailableMaps { get; set; } = new List<Map>();
+
+        public ChangeMapService(ILogger<ChangeMapService> logger, IGameModeService gameModeService)
             : base(logger)
         {
+            this._gameModeService = gameModeService;
         }
 
-        public void Changemap(CCSPlayerController? player, CommandInfo command, IList<Map> availableMaps)
+        public override void Init(ManzaTools manzaTools)
         {
-            if (player == null)
+            manzaTools.AddCommand("css_changemap", "Changes the current Map", Changemap);
+            manzaTools.RegisterListener((Listeners.OnMapStart)(entity => _gameModeService.LoadGameMode(GameModeEnum.Practice)));
+        }
+
+        public void Changemap(CCSPlayerController? player, CommandInfo command)
+        {
+            if (player == null || !AvailableMaps.Any())
                 return;
 
             if (command.ArgCount == 1)
             {
                 Responses.ReplyToPlayer(Statics.GetChatText("Available Maps:"), player);
-                Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
+                Responses.ReplyToPlayer(string.Join(", ", AvailableMaps.Select(x => x.Name)), player);
                 return;
             }
             var newMapName = command.GetArg(1);
-            var newMap = availableMaps.FirstOrDefault(map => FindMapByName(map, newMapName));
+            var newMap = AvailableMaps.FirstOrDefault(map => FindMapByName(map, newMapName));
             if (newMap == null)
             {
                 Responses.ReplyToPlayer($"Selected map {newMapName} not found. Available Maps:", player, true);
-                Responses.ReplyToPlayer(string.Join(", ", availableMaps.Select(x => x.Name)), player);
+                Responses.ReplyToPlayer(string.Join(", ", AvailableMaps.Select(x => x.Name)), player);
                 Responses.ReplyToServer($"Selected map {newMapName} not found.", false, true);
             }
             else
             {
+                Server.ExecuteCommand("css_bots_kick");
+
                 if (newMap.Id > 0)
                     Server.ExecuteCommand($"host_workshop_map {newMap.Id}");
                 else
@@ -49,7 +62,7 @@ namespace ManzaTools.Services
 
         private static bool FindMapByName(Map map, string newMapName)
         {
-            bool mapFound = map.Name == newMapName;
+            bool mapFound = map.Name.ToLower() == newMapName.ToLower();
             if (!mapFound)
             {
                 return map.Name?.Substring(3) == newMapName;
@@ -57,7 +70,7 @@ namespace ManzaTools.Services
             return mapFound;
         }
 
-        public IList<Map> PreLoadAvailableMaps()
+        public void PreLoadAvailableMaps()
         {
             var fileName = "maps.json";
             var filePath = Path.Join(Statics.CfgPath, fileName);
@@ -79,12 +92,12 @@ namespace ManzaTools.Services
 
                     _logger.LogInformation(maps);
 
-                    return loadedMaps;
+                    AvailableMaps = loadedMaps;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError("Could not load available maps", ex);
-                    return new List<Map>();
+                    AvailableMaps = new List<Map>();
                 }
             }
             else
@@ -119,12 +132,12 @@ namespace ManzaTools.Services
                     File.WriteAllText(filePath, defaultJson);
 
                     _logger.LogInformation("Created a new JSON file with default maps.");
-                    return defaultMaps;
+                    AvailableMaps = defaultMaps;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError("Could not save default maps", ex);
-                    return new List<Map>();
+                    AvailableMaps = new List<Map>();
                 }
             }
 

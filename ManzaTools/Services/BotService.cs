@@ -26,6 +26,15 @@ namespace ManzaTools.Services
         {
         }
 
+        public override void Init(ManzaTools manzaTools)
+        {
+            manzaTools.RegisterListener((Listeners.OnMapStart)(entity => currentPlacedBots?.Clear()));
+            manzaTools.RegisterEventHandler<EventPlayerSpawn>((@event, info) => PositionBotOnRespawn(@event, info));
+            manzaTools.AddCommand("css_bot", "Places a bot with given params", CreateBot);
+            manzaTools.AddCommand("css_bot_kick", "Removes a single bots", RemoveBot);
+            manzaTools.AddCommand("css_bots_kick", "Removes all bots", RemoveBots);
+        }
+
         private void AddBot(CCSPlayerController player, bool crouchBot, byte teamNum)
         {
             if (PlayerExtension.IsCounterTerrorist(teamNum))
@@ -72,35 +81,42 @@ namespace ManzaTools.Services
 
         private void HandleNewBot(CCSPlayerController botOwner, bool crouchBot)
         {
-            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
+            var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
             var targetPosition = botOwner.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
             var targetViewAngle = botOwner.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsRotation;
             if (targetPosition == null || targetViewAngle == null)
-                return;
-
-            foreach (var playerEntity in playerEntities)
             {
-                var alreadyExistingBot = currentPlacedBots.FirstOrDefault(x => x.Bot.Index == playerEntity.Index);
+                Responses.SendDebug($"No bot position found: {targetPosition} {targetViewAngle}", nameof(BotService), nameof(HandleNewBot));
+                return;
+            }
+
+            var firstPlaceBots = playerEntities.Where(x => currentPlacedBots.All(y => y.Bot.Index != x.Index));
+            foreach (var firstPlaceBot in firstPlaceBots)
+            {
+                var alreadyExistingBot = currentPlacedBots.FirstOrDefault(x => x.Bot.Index == firstPlaceBot.Index);
                 if (alreadyExistingBot != null)
+                {
+                    Responses.SendDebug($"Bot to place already exists", nameof(BotService), nameof(HandleNewBot));
                     continue;
-                TeleportBot(targetPosition, targetViewAngle, playerEntity, crouchBot);
+                }
+                TeleportBot(targetPosition, targetViewAngle, firstPlaceBot, crouchBot);
                 currentPlacedBots.Add(new PlacedBots
                 {
                     Position = new Vector(targetPosition.X, targetPosition.Y, targetPosition.Z),
                     Angle = new QAngle(targetViewAngle.X, targetViewAngle.Y, targetViewAngle.Z),
                     Crouch = crouchBot,
-                    PlayerName = playerEntity.PlayerName,
+                    PlayerName = firstPlaceBot.PlayerName,
                     Owner = botOwner,
-                    Bot = playerEntity
+                    Bot = firstPlaceBot
                 });
-                TemporarilyDisableCollisions(botOwner, playerEntity);
+                TemporarilyDisableCollisions(botOwner, firstPlaceBot);
             }
 
         }
 
         public HookResult PositionBotOnRespawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            if (!GameModeIsPractice)
+            if (!GameModeIsPractice || !IsPlayerValid(@event.Userid))
                 return HookResult.Continue;
             var bot = @event.Userid;
             if (bot.IsValid && bot.IsBot && bot.UserId.HasValue && !bot.IsHLTV)
@@ -115,6 +131,10 @@ namespace ManzaTools.Services
 
                 TeleportBot(placedBot.Position, placedBot.Angle, bot, placedBot.Crouch);
             }
+            else
+            {
+                Responses.SendDebug($"PlayerEntity to position is not valid: {bot.IsValid} {bot.IsBot} {bot.UserId.HasValue} {!bot.IsHLTV}",nameof(BotService), nameof(PositionBotOnRespawn));
+            }
             return HookResult.Continue;
         }
 
@@ -125,13 +145,13 @@ namespace ManzaTools.Services
 
             var botToKick = info.ArgByIndex(1);
 
-            var playerEntity = Utilities.GetPlayers().FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
+            var playerEntity = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").FirstOrDefault(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV && botToKick.ToLower() == x.PlayerName.ToLower());
             if (playerEntity == null)
             {
                 player.PrintToChat($"Not bot named \"{botToKick}\" found.");
                 return;
             }
-
+            currentPlacedBots.Remove(currentPlacedBots.First(x => x.PlayerName?.ToLower() == playerEntity.PlayerName.ToLower()));
             Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
         }
 
@@ -140,17 +160,23 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice || player == null)
                 return;
 
-            var playerEntities = Utilities.GetPlayers().Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
+            var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").Where(x => x.IsValid && x.IsBot && x.UserId.HasValue && !x.IsHLTV);
             foreach (var playerEntity in playerEntities)
+            {
+                currentPlacedBots.Remove(currentPlacedBots.First(x => x.PlayerName?.ToLower() == playerEntity.PlayerName.ToLower()));
                 Server.ExecuteCommand($"bot_kick {playerEntity.PlayerName}");
+            }
         }
 
         private void TeleportBot(Vector targetPosition, QAngle targetViewAngle, CCSPlayerController playerEntity, bool crouchBot)
         {
             try
             {
-                if (!playerEntity.PlayerPawn.IsValid || playerEntity.PlayerPawn.Value?.Bot == null)
+                if (!playerEntity.PlayerPawn.IsValid || playerEntity.PlayerPawn.Value?.IsValid == false || playerEntity.PlayerPawn.Value?.Bot == null)
+                {
+                    Responses.SendDebug($"Bot to teleport is not valid: {!playerEntity.PlayerPawn.IsValid} {playerEntity.PlayerPawn.Value?.Bot == null}", nameof(BotService), nameof(TeleportBot));
                     return;
+                }
                 playerEntity.PlayerPawn.Value.Teleport(targetPosition, targetViewAngle, new Vector(0, 0, 0));
                 playerEntity.PlayerPawn.Value.Flags |= 2;
                 CCSPlayer_MovementServices movementService = new(playerEntity.PlayerPawn.Value.MovementServices!.Handle);
