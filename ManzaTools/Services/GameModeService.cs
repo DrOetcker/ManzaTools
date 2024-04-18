@@ -48,7 +48,8 @@ namespace ManzaTools.Services
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
             CurrentGameMode = newGameMode;
             Responses.ReplyToServer($"Loaded GameMode {CurrentGameMode}!{GetHappyTextByMode(CurrentGameMode)}");
-            DrawSpawns();
+            Utils.Timer.CreateTimer(2f, () => DrawSpawns());
+            
         }
 
         private string GetHappyTextByMode(GameModeEnum currentGameMode)
@@ -78,19 +79,19 @@ namespace ManzaTools.Services
             foreach (var spawn in ctSpawns)
             {
                 DrawPolygon(new List<Vector> {
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
                 }, 1, Color.MediumVioletRed);
             }
             foreach (var spawn in tSpawns)
             {
                 DrawPolygon(new List<Vector> {
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
-                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -10, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+10, spawn.CBodyComponent.SceneNode.AbsOrigin.Z),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X +15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y-15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
+                    new Vector(spawn.CBodyComponent.SceneNode.AbsOrigin.X -15, spawn.CBodyComponent.SceneNode.AbsOrigin.Y+15, spawn.CBodyComponent.SceneNode.AbsOrigin.Z+10),
                 }, 1, Color.MediumVioletRed);
             }
         }
@@ -100,6 +101,7 @@ namespace ManzaTools.Services
         {
             if (vertices.Count < 2)
             {
+                Responses.ReplyToServer("Could not draw - too little vertices");
                 return;
             }
 
@@ -111,10 +113,10 @@ namespace ManzaTools.Services
         }
         public static void DrawBeam(Vector startPos, Vector endPos, float width, Color color)
         {
-            CBeam beam = Utilities.CreateEntityByName<CBeam>("beam");
+            CBeam beam = Utilities.CreateEntityByName<CBeam>("env_beam");
             if (beam == null)
             {
-                // Failed to create beam...  
+                Responses.ReplyToServer("Could not draw - failed to create beam");
                 return;
             }
 

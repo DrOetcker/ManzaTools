@@ -136,12 +136,12 @@ namespace ManzaTools.Services
             if (!GameModeIsPractice || player?.PlayerPawn.Value == null)
                 return;
 
-            var userThronGrenade = personalThrownGrenades.FirstOrDefault(x => x.UserSteamId == player.SteamID);
-            if (userThronGrenade == null)
+            var userThrownGrenade = personalThrownGrenades.FirstOrDefault(x => x.UserSteamId == player.SteamID);
+            if (userThrownGrenade == null)
                 return;
 
             CBaseCSGrenadeProjectile? grenadeProjectile = null;
-            switch (userThronGrenade.Weapon)
+            switch (userThrownGrenade.Weapon)
             {
                 case Consts.Flash:
                     grenadeProjectile = Utilities.CreateEntityByName<CFlashbangProjectile>("flashbang_projectile");
@@ -153,9 +153,9 @@ namespace ManzaTools.Services
                     grenadeProjectile.DispatchSpawn();
                     break;
                 case Consts.Smoke:
-                    var velocity = TeleportHelper.GetAngleFromJsonString(userThronGrenade.Velocity);
+                    var velocity = TeleportHelper.GetAngleFromJsonString(userThrownGrenade.Velocity);
                     grenadeProjectile = RecordService.CSmokeGrenadeProjectile_CreateFunc.Invoke(
-                                    userThronGrenade.PlayerPosition.Handle,
+                                    userThrownGrenade.PlayerPosition.Handle,
                                     new QAngle().Handle,
                                     velocity.Handle,
                                     velocity.Handle,
@@ -195,8 +195,8 @@ namespace ManzaTools.Services
 
             if (grenadeProjectile != null && grenadeProjectile.DesignerName != "smokegrenade_projectile")
             {
-                var position = TeleportHelper.GetVectorFromJsonString(userThronGrenade.Position);
-                var velocity = TeleportHelper.GetVectorFromJsonString(userThronGrenade.Velocity);
+                var position = TeleportHelper.GetVectorFromJsonString(userThrownGrenade.Position);
+                var velocity = TeleportHelper.GetVectorFromJsonString(userThrownGrenade.Velocity);
 
                 grenadeProjectile.InitialPosition.X = position.X;
                 grenadeProjectile.InitialPosition.Y = position.Y;
