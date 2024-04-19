@@ -155,7 +155,7 @@ namespace ManzaTools.Services
                 case Consts.Smoke:
                     var velocity = TeleportHelper.GetAngleFromJsonString(userThrownGrenade.Velocity);
                     grenadeProjectile = RecordService.CSmokeGrenadeProjectile_CreateFunc.Invoke(
-                                    userThrownGrenade.PlayerPosition.Handle,
+                                    TeleportHelper.GetVectorFromJsonString(userThrownGrenade.Position).Handle,
                                     new QAngle().Handle,
                                     velocity.Handle,
                                     velocity.Handle,
@@ -178,18 +178,19 @@ namespace ManzaTools.Services
                     break;
                 case Consts.Molotov:
                 case Consts.Inc:
-                    grenadeProjectile = Utilities.CreateEntityByName<CMolotovProjectile>("molotov_projectile");
-                    if (grenadeProjectile == null)
+                    CMolotovProjectile molly = Utilities.CreateEntityByName<CMolotovProjectile>("molotov_projectile");
+                    if (molly == null)
                     {
                         return;
                     }
 
-                    grenadeProjectile.Damage = 200;
-                    grenadeProjectile.DmgRadius = 300;
+                    molly.Damage = 200;
+                    molly.DmgRadius = 300;
 
-                    grenadeProjectile.DispatchSpawn();
-                    grenadeProjectile.AcceptInput("InitializeSpawnFromWorld");
-                    grenadeProjectile.SetModel("weapons/models/grenade/molotov/weapon_molotov.vmdl");
+                    molly.DispatchSpawn();
+                    molly.AcceptInput("InitializeSpawnFromWorld");
+                    molly.SetModel("weapons/models/grenade/molotov/weapon_molotov.vmdl");
+                    grenadeProjectile = molly;
                     break;
             }
 

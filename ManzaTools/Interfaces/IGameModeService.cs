@@ -1,4 +1,5 @@
-﻿using ManzaTools.Models;
+﻿using CounterStrikeSharp.API.Modules.Commands;
+using ManzaTools.Models;
 
 namespace ManzaTools.Interfaces;
 

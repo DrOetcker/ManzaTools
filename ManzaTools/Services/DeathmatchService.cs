@@ -85,8 +85,8 @@ namespace ManzaTools.Services
             _gameModeService.LoadGameMode(GameModeEnum.Deathmatch);
             _isPistolMode = false;
             if (info.ArgCount <= 1)
-
                 return;
+
             var startupInfo = new List<string>();
             if (info.ArgString.ToLower().Contains("nobots"))
             {

@@ -22,6 +22,7 @@ namespace ManzaTools.Services
             InitCfg(initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.Practice]);
             InitCfg(initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.PracticeMatch]);
             InitCfg(initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.Deathmatch]);
+            InitCfg(initCfgDirectory, Statics.GameModeCfgs[GameModeEnum.PracticeMatchBots]);
             InitCfg(initCfgDirectory, "dmHsOnly.cfg");
             InitCfg(initCfgDirectory, "dmNoBots.cfg");
             InitCfg(initCfgDirectory, "dmPistolsOnly.cfg");

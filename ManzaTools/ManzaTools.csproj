@@ -20,6 +20,9 @@
 		<None Update="initCfgs\dmNoBots.cfg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="initCfgs\practiceMatchBots.cfg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="initCfgs\dmPistolsOnly.cfg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

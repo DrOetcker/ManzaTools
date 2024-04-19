@@ -24,9 +24,9 @@ namespace ManzaTools.Services
         {
             manzaTools.AddCommand("css_prac", "Changes the current GameMode to practice", (player, info) => LoadGameMode(GameModeEnum.Practice));
             manzaTools.AddCommand("css_pracmatch", "Changes the current GameMode to practice match", (player, info) => LoadGameMode(GameModeEnum.PracticeMatch));
+            manzaTools.AddCommand("css_pracmatchbots", "Changes the current GameMode to practice match with bots", (player, info) => LoadGameMode(GameModeEnum.PracticeMatchBots));
             manzaTools.AddCommand("css_match", "Changes the current GameMode to match match", (player, info) => LoadGameMode(GameModeEnum.Match));
         }
-
 
         public bool IsPractice()
         {
@@ -41,15 +41,16 @@ namespace ManzaTools.Services
                 _logger.LogError($"No cfg found for GameMode {newGameMode}. Keeping GameMode {CurrentGameMode}");
                 return;
             }
-            if (newGameMode == GameModeEnum.PracticeMatch)
-            {
-                Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", Statics.GameModeCfgs[GameModeEnum.Practice])}");
-            }
+            //if (newGameMode == GameModeEnum.PracticeMatch)
+            //{
+            //    Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", Statics.GameModeCfgs[GameModeEnum.Practice])}");
+            //}
             Server.ExecuteCommand($"execifexists {Path.Combine("ManzaTools", cfgToLoad)}");
+
             CurrentGameMode = newGameMode;
             Responses.ReplyToServer($"Loaded GameMode {CurrentGameMode}!{GetHappyTextByMode(CurrentGameMode)}");
             Utils.Timer.CreateTimer(2f, () => DrawSpawns());
-            
+
         }
 
         private string GetHappyTextByMode(GameModeEnum currentGameMode)
