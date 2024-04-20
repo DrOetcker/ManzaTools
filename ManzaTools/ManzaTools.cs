@@ -25,6 +25,7 @@ namespace ManzaTools
         private readonly ISavedNadesService _savedNadesService;
         private readonly ISpawnService _spawnService;
         private readonly IRecordService _recordService;
+        private readonly IAdminService _adminService;
 
         public ManzaTools(
             ICfgShipperService cfgShipper,
@@ -39,7 +40,8 @@ namespace ManzaTools
             IEndRoundService endRoundService,
             ISavedNadesService savedNadesService,
             IBotService botService,
-            IRecordService recordService)
+            IRecordService recordService,
+            IAdminService adminService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -54,6 +56,7 @@ namespace ManzaTools
             _savedNadesService = savedNadesService;
             _botService = botService;
             _recordService = recordService;
+            _adminService = adminService;
         }
 
         public override string ModuleAuthor => "DrOetcker";
@@ -118,6 +121,7 @@ namespace ManzaTools
             _savedNadesService.Init(this);
             _spawnService.Init(this);
             _recordService.Init(this);
+            _adminService.Init(this);
         }
 
         private void InitTestPlugin()

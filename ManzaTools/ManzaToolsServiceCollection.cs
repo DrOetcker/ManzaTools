@@ -24,6 +24,7 @@ namespace ManzaTools
             serviceCollection.AddSingleton<ISavedNadesService, SavedNadesService>();
             serviceCollection.AddSingleton<IBotService, BotService>();
             serviceCollection.AddSingleton<IRecordService, RecordService>();
+            serviceCollection.AddSingleton<IAdminService, AdminService>();
         }
     }
 }
