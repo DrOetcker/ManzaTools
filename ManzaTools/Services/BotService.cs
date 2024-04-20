@@ -56,7 +56,7 @@ namespace ManzaTools.Services
             AddBot(player, crouchBot, teamSide);
         }
 
-        private static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
+        public static byte DetermineTeamSide(byte playerTeamNum, IList<string> argList)
         {
             byte? ctNum = argList.Contains("ct") ? PlayerExtension.TeamToTeamNum("ct") : null;
             byte? tNum = argList.Contains("t") ? PlayerExtension.TeamToTeamNum("t") : null;

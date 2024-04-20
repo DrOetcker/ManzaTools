@@ -1,7 +1,8 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
-
+using CounterStrikeSharp.API.Modules.Utils;
+using ManzaTools.Extensions;
 using ManzaTools.Interfaces;
 using ManzaTools.Utils;
 
@@ -29,7 +30,24 @@ namespace ManzaTools.Services
                     Responses.ReplyToPlayer("Could not end round - Not in PracticeMatch", player, true);
                 return;
             }
-            Server.ExecuteCommand("endround");
+
+            if(_gameModeService.CurrentGameMode == Models.GameModeEnum.PracticeMatch)
+            {
+                if (PlayerExtension.IsCounterTerrorist(player!.TeamNum))
+                    Server.ExecuteCommand("bot_add_t");
+                else
+                    Server.ExecuteCommand("bot_add_ct");
+
+                Server.ExecuteCommand("bot_kick all");
+            }
+            else
+            {
+                Server.ExecuteCommand("bot_kill all");
+            }
+
+
+
+
             Responses.ReplyToServer("Start new round - GLHF");
         }
     }
