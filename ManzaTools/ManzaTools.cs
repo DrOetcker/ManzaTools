@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using ManzaTools.Config;
 using ManzaTools.Interfaces;
@@ -25,6 +26,7 @@ namespace ManzaTools
         private readonly ISavedNadesService _savedNadesService;
         private readonly ISpawnService _spawnService;
         private readonly IRecordService _recordService;
+        private readonly IAdminService _adminService;
 
         public ManzaTools(
             ICfgShipperService cfgShipper,
@@ -39,7 +41,8 @@ namespace ManzaTools
             IEndRoundService endRoundService,
             ISavedNadesService savedNadesService,
             IBotService botService,
-            IRecordService recordService)
+            IRecordService recordService,
+            IAdminService adminService)
         {
             _cfgShipper = cfgShipper;
             _gameModeService = gameModeService;
@@ -54,6 +57,7 @@ namespace ManzaTools
             _savedNadesService = savedNadesService;
             _botService = botService;
             _recordService = recordService;
+            _adminService = adminService;
         }
 
         public override string ModuleAuthor => "DrOetcker";
@@ -69,9 +73,9 @@ namespace ManzaTools
             try
             {
                 Config = config;
-                _effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
-                _effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
-                _effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
+                //_effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
+                //_effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
+                //_effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
                 _changeMapService.PreLoadAvailableMaps();
                 if (Config.DefaultGameMode != GameModeEnum.Disabled)
                 {
@@ -97,6 +101,12 @@ namespace ManzaTools
         {
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
             Responses.ReplyToServer("Loaded ManzaTools", false, true);
+            //RegisterEventHandler<EventRoundStart>((@event, info) =>
+            //{
+            //    Logger.LogInformation("Round has started with time limit of {Timelimit}", @event.Timelimit);
+
+            //    return HookResult.Continue;
+            //}); -- uncomment to kill server
         }
 
         public override void Unload(bool hotReload)
@@ -106,18 +116,19 @@ namespace ManzaTools
 
         private void InitServices()
         {
-            _botService.Init(this);
+            //_botService.Init(this); - Kills server
             _changeMapService.Init(this);
             _clearService.Init(this);
-            _deathmatchService.Init(this);
-            _effectService.Init(this);
+            //_deathmatchService.Init(this); - Kills server
+            //_effectService.Init(this); - Kills server
             _endRoundService.Init(this);
             _gameModeService.Init(this);
             _rconService.Init(this);
-            _rethrowService.Init(this);
+            //_rethrowService.Init(this); - Kills server
             _savedNadesService.Init(this);
             _spawnService.Init(this);
-            _recordService.Init(this);
+            //_recordService.Init(this); - Kills server
+            _adminService.Init(this);
         }
 
         private void InitTestPlugin()
