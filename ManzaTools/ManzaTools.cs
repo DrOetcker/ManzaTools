@@ -73,9 +73,9 @@ namespace ManzaTools
             try
             {
                 Config = config;
-                //_effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
-                //_effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
-                //_effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
+                _effectService.SetSmokeTimerEnabled(Config.SmokeTimerEnabled);
+                _effectService.SetBlindTimerEnabled(Config.BlindTimerEnabled);
+                _effectService.SetDamageReportEnabled(Config.DamageReportEnabled);
                 _changeMapService.PreLoadAvailableMaps();
                 if (Config.DefaultGameMode != GameModeEnum.Disabled)
                 {
@@ -101,12 +101,6 @@ namespace ManzaTools
         {
             _cfgShipper.InitDefaultCfgs(ModuleDirectory);
             Responses.ReplyToServer("Loaded ManzaTools", false, true);
-            //RegisterEventHandler<EventRoundStart>((@event, info) =>
-            //{
-            //    Logger.LogInformation("Round has started with time limit of {Timelimit}", @event.Timelimit);
-
-            //    return HookResult.Continue;
-            //}); -- uncomment to kill server
         }
 
         public override void Unload(bool hotReload)
@@ -116,18 +110,18 @@ namespace ManzaTools
 
         private void InitServices()
         {
-            //_botService.Init(this); - Kills server
+            _botService.Init(this);
             _changeMapService.Init(this);
             _clearService.Init(this);
-            //_deathmatchService.Init(this); - Kills server
-            //_effectService.Init(this); - Kills server
+            _deathmatchService.Init(this);
+            _effectService.Init(this);
             _endRoundService.Init(this);
             _gameModeService.Init(this);
             _rconService.Init(this);
-            //_rethrowService.Init(this); - Kills server
+            _rethrowService.Init(this);
             _savedNadesService.Init(this);
             _spawnService.Init(this);
-            //_recordService.Init(this); - Kills server
+            _recordService.Init(this);
             _adminService.Init(this);
         }
 
